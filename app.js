@@ -355,6 +355,38 @@ async function apiPost(path, payload) {
   return data;
 }
 
+function externalLoginUrl(provider) {
+  const returnUrl = `${location.origin}${location.pathname}#login-success`;
+  return `${API_BASE}/api/external-auth/${provider}/login?returnUrl=${encodeURIComponent(returnUrl)}`;
+}
+
+function saveSession(member, token) {
+  state.member = member;
+  state.token = token;
+  localStorage.setItem("miglow-member", JSON.stringify(member));
+  localStorage.setItem("miglow-token", token);
+}
+
+function enhanceAuthPage(page) {
+  if (!["login", "register", "forgot"].includes(page)) return;
+
+  const authCard = document.querySelector(".auth-card");
+  const form = authCard?.querySelector("form");
+  if (!authCard || !form || authCard.querySelector(".social-login")) return;
+
+  const label = page === "login" ? "登入" : page === "forgot" ? "登入" : "註冊";
+  form.insertAdjacentHTML("afterend", `
+    <div class="social-login">
+      <span>或使用以下方式${label}</span>
+      <div>
+        <a class="social-button" href="${externalLoginUrl("facebook")}" aria-label="使用 Facebook ${label}">f</a>
+        <a class="social-button" href="${externalLoginUrl("google")}" aria-label="使用 Google ${label}">G</a>
+        <a class="social-button" href="${externalLoginUrl("microsoft")}" aria-label="使用 Microsoft ${label}">M</a>
+      </div>
+    </div>
+  `);
+}
+
 async function handleSubmit(event) {
   const form = event.target.closest("form");
   if (!form) return;
@@ -365,10 +397,7 @@ async function handleSubmit(event) {
   try {
     if (type === "login") {
       const result = await apiPost("/api/members/login", { email: values.email, password: values.password });
-      state.member = result.member;
-      state.token = result.accessToken;
-      localStorage.setItem("miglow-member", JSON.stringify(state.member));
-      localStorage.setItem("miglow-token", state.token);
+      saveSession(result.member, result.accessToken);
       showToast("登入成功，歡迎回來");
       location.hash = "products";
     }
@@ -455,7 +484,14 @@ function render() {
   else if (page === "register") app.innerHTML = authShell("register");
   else if (page === "forgot") app.innerHTML = authShell("forgot");
   else if (page === "cart") renderCart();
+  else if (page === "login-success") {
+    state.member = JSON.parse(localStorage.getItem("miglow-member") || "null");
+    state.token = localStorage.getItem("miglow-token") || "";
+    renderProducts();
+    showToast("社群帳號登入成功");
+  }
   else renderHome();
+  enhanceAuthPage(page);
   window.scrollTo({ top: 0, behavior: "smooth" });
   updateCartCount();
 }

@@ -170,6 +170,23 @@ h3 { font-size: clamp(22px, 2.4vw, 30px); }
 .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 .form-note { color: var(--muted); text-align: center; }
 .form-note a { color: var(--rose-dark); text-decoration: underline; }
+.social-login { margin-top: 26px; text-align: center; color: var(--muted); }
+.social-login > span { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 18px; }
+.social-login > span::before,
+.social-login > span::after { content: ""; height: 1px; background: var(--line); }
+.social-login > div { display: flex; justify-content: center; gap: 24px; margin-top: 22px; }
+.social-button {
+  width: 62px;
+  height: 62px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.74);
+  display: grid;
+  place-items: center;
+  font: 700 24px/1 Arial, sans-serif;
+  color: var(--rose-dark);
+  box-shadow: 0 8px 24px rgba(112, 79, 65, .08);
+}
 
 .cart-layout, .contact-layout, .about-layout {
   max-width: 1120px;
