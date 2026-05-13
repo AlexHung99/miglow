@@ -1,4 +1,6 @@
-const API_BASE = location.origin;
+const API_BASE = location.hostname.endsWith("github.io")
+  ? "http://1.34.16.127:5073"
+  : location.origin;
 
 const products = [
   {
