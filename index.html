@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>微光 MI GLOW</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="微光首頁">
+      <span class="brand-mark">微 光</span>
+      <span class="brand-sub">MI GLOW</span>
+    </a>
+    <button class="menu-button" type="button" aria-label="開啟選單">☰</button>
+    <nav class="nav" aria-label="主要導覽">
+      <a href="#home">首頁</a>
+      <a href="#products">商品介紹</a>
+      <a href="#about">關於我們</a>
+      <a href="#guide">訂購須知</a>
+      <a href="#contact">聯絡我們</a>
+    </nav>
+    <div class="header-actions">
+      <a class="icon-link" href="#login" aria-label="會員登入">♡</a>
+      <a class="cart-link" href="#cart" aria-label="購物車">
+        <span>▢</span>
+        <b id="cart-count">0</b>
+      </a>
+    </div>
+  </header>
+
+  <main id="app"></main>
+
+  <footer class="footer">
+    <section class="promise-strip" aria-label="品牌承諾">
+      <article><span>♧</span><b>嚴選食材</b><small>安心食材，吃得放心</small></article>
+      <article><span>♡</span><b>手工製作</b><small>用心製作每一份甜點</small></article>
+      <article><span>▣</span><b>精美包裝</b><small>送禮自用兩相宜</small></article>
+      <article><span>▤</span><b>快速出貨</b><small>新鮮美味，快速送達</small></article>
+    </section>
+    <div class="footer-main">
+      <div class="brand footer-brand">
+        <span class="brand-mark">微 光</span>
+        <span class="brand-sub">MI GLOW</span>
+      </div>
+      <div class="socials" aria-label="社群連結">
+        <span>IG</span><span>f</span><span>LINE</span>
+      </div>
+      <nav>
+        <a href="#home">首頁</a>
+        <a href="#products">商品介紹</a>
+        <a href="#about">關於我們</a>
+        <a href="#guide">訂購須知</a>
+        <a href="#contact">聯絡我們</a>
+      </nav>
+      <p>© 2024 MI GLOW 微光甜點工作室 All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
