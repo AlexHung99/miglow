@@ -1,0 +1,9 @@
+# 僅發布前端（docs/）與 README 至 GitHub Pages
+# 內部規格與設計稿、本機開發設定不上傳（後台另置於 GitLab）
+/web_spec/
+/brand_design/
+/.claude/
+
+# OS / editor
+Thumbs.db
+.DS_Store

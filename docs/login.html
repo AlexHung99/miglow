@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>會員登入｜微光 MI GLOW</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#F4EFE7">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Sans+TC:wght@300;400;500&family=Noto+Serif+TC:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/components.js" defer></script>
+  <script src="assets/js/store.js" defer></script>
+  <script src="assets/js/account.js" defer></script>
+</head>
+<body data-page="account">
+  <header class="site-header" id="site-header"></header>
+  <main>
+    <section class="page-section">
+      <div class="container">
+        <div class="auth-wrap">
+          <div class="auth-card">
+            <h1>會員登入</h1>
+            <p class="sub">歡迎回到微光</p>
+            <div id="authNotice"></div>
+            <form id="loginForm" class="form" novalidate>
+              <div class="field">
+                <label for="email">電子郵件<span class="req">*</span></label>
+                <input class="input" id="email" type="email" autocomplete="email">
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="password">密碼<span class="req">*</span></label>
+                <div class="password-wrap">
+                  <input class="input" id="password" type="password" autocomplete="current-password">
+                  <button type="button" class="password-toggle" data-toggle="password" aria-label="顯示密碼"></button>
+                </div>
+                <div class="field-error"></div>
+              </div>
+              <div class="auth-links"><span></span><a href="forgot-password.html">忘記密碼？</a></div>
+              <button class="btn btn--solid btn--block" type="submit">登入</button>
+            </form>
+            <div class="auth-foot">還沒有帳號？<a href="register.html">前往註冊</a></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer" id="site-footer"></footer>
+</body>
+</html>

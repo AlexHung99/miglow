@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>微光 MI GLOW｜手作雪花酥・甜在心裡的幸福</title>
+  <meta name="description" content="微光 MI GLOW 是手工甜點品牌，小批次手作雪花酥，原味、草莓、巧克力三種口味。在日常裡，留一點微光的甜。">
+  <meta name="theme-color" content="#F4EFE7">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="微光 MI GLOW｜手作雪花酥">
+  <meta property="og:description" content="在日常裡，留一點微光的甜。小批次手作雪花酥。">
+  <meta property="og:image" content="assets/images/brand/hero.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Sans+TC:wght@300;400;500&family=Noto+Serif+TC:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <!-- 資料層 → 元件 → 頁面邏輯（defer 保留載入順序） -->
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/components.js" defer></script>
+  <script src="assets/js/store.js" defer></script>
+  <script src="assets/js/home.js" defer></script>
+</head>
+<body data-page="home">
+
+  <header class="site-header" id="site-header"></header>
+
+  <main>
+    <!-- Hero 輪播 -->
+    <section class="hero" id="hero"></section>
+
+    <!-- 商品展示：雪花酥系列 -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 class="zh">雪花酥系列</h2>
+          <span class="en">Our Products</span>
+          <p class="desc">三種口味・三種幸福。手工棉花糖包裹堅果與果乾，奶香細緻、口感酥軟。</p>
+        </div>
+        <div class="products-grid" id="productsGrid"></div>
+      </div>
+    </section>
+
+    <!-- 服務特色 -->
+    <section class="section">
+      <div class="container">
+        <div class="features" id="featuresGrid"></div>
+      </div>
+    </section>
+
+    <!-- 關於微光 -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="about">
+          <div class="about__media reveal">
+            <img src="assets/images/brand/bags.png" alt="微光 MI GLOW 品牌包裝">
+          </div>
+          <div class="about__text reveal">
+            <h2 class="about__zh">關於微光</h2>
+            <span class="about__en">About MI Glow</span>
+            <div class="about__body">
+              <p>微光，取自日常裡那一點剛剛好的光。我們相信幸福不必喧嘩，像一塊手作雪花酥，安靜地甜進心裡。</p>
+              <p>每一份都以小批次手作，嚴選食材、細心包裝，無論送禮或自享，都是恰到好處的溫柔。</p>
+            </div>
+            <a href="about.html" class="btn">了解更多</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Instagram -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 class="zh">追蹤微光的日常</h2>
+          <span class="en">Follow Us on Instagram</span>
+        </div>
+        <div class="ig-grid" id="igGrid"></div>
+        <div class="text-center">
+          <a class="ig-handle" href="https://www.instagram.com/miglow.cw" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg>
+            @miglow.cw
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+</body>
+</html>

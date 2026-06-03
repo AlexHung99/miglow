@@ -1,0 +1,187 @@
+/* =============================================================================
+ * 微光 MI GLOW — 會員：登入 / 註冊 / 忘記密碼 / 會員中心（原型 mock）
+ * 註冊會員存於 localStorage(miglow_members)，登入狀態存於 miglow_session。
+ * 皆為前端原型，正式版改打 /api/auth/*。
+ * ========================================================================== */
+(function () {
+  "use strict";
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 4l16 16M9.9 5.2A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3 3.6M6.3 6.3A17 17 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 3.5-.6M9.5 9.5a3 3 0 0 0 4.2 4.2"/></svg>';
+
+  function read(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } }
+  function members() { return read("miglow_members", []); }
+  function val(id) { const e = document.getElementById(id); return e ? e.value : ""; }
+  function validate(rules) {
+    let ok = true;
+    rules.forEach(([id, fn, msg]) => {
+      const el = document.getElementById(id); if (!el) return;
+      const f = el.closest(".field"); const err = f && f.querySelector(".field-error");
+      if (!fn(el.value)) { ok = false; el.classList.add("is-invalid"); if (err) err.textContent = msg; }
+      else { el.classList.remove("is-invalid"); if (err) err.textContent = ""; }
+    });
+    return ok;
+  }
+  function notice(html) { const n = document.getElementById("authNotice"); if (n) n.innerHTML = html; }
+
+  /* 密碼顯示切換 */
+  function initPasswordToggles() {
+    document.querySelectorAll("[data-toggle]").forEach((btn) => {
+      btn.innerHTML = EYE;
+      btn.addEventListener("click", () => {
+        const input = document.getElementById(btn.dataset.toggle);
+        const show = input.type === "password";
+        input.type = show ? "text" : "password";
+        btn.innerHTML = show ? EYE_OFF : EYE;
+      });
+    });
+  }
+
+  /* ---------------- 登入 ---------------- */
+  function initLogin() {
+    const form = document.getElementById("loginForm");
+    if (!form) return;
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!validate([
+        ["email", (v) => emailRe.test(v), "請輸入有效的電子郵件"],
+        ["password", (v) => v.length >= 6, "密碼至少 6 碼"]
+      ])) return;
+
+      const email = val("email").trim().toLowerCase();
+      const found = members().find((m) => m.email.toLowerCase() === email);
+      if (found && found.password !== val("password")) {
+        notice('<div class="notice notice--err">密碼錯誤，請再試一次。</div>'); return;
+      }
+      // 原型：未註冊的 email 也允許快速登入展示
+      const me = found || { display_name: email.split("@")[0], email: val("email").trim(), phone: "" };
+      window.MG.session.login({ display_name: me.display_name, email: me.email, phone: me.phone });
+      location.href = "member.html";
+    });
+  }
+
+  /* ---------------- 註冊 ---------------- */
+  function initRegister() {
+    const form = document.getElementById("registerForm");
+    if (!form) return;
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const agree = document.getElementById("agree");
+      let ok = validate([
+        ["name", (v) => !!v.trim(), "請輸入姓名"],
+        ["phone", (v) => /^\d{8,}$/.test(v.replace(/\D/g, "")), "請輸入有效手機號碼"],
+        ["email", (v) => emailRe.test(v), "請輸入有效的電子郵件"],
+        ["password", (v) => v.length >= 6, "密碼至少 6 碼"],
+        ["password2", (v) => v === val("password"), "兩次密碼不一致"]
+      ]);
+      if (!agree.checked) { ok = false; notice('<div class="notice notice--err">請先同意隱私權政策與服務條款。</div>'); }
+      if (!ok) return;
+
+      const list = members();
+      if (list.some((m) => m.email.toLowerCase() === val("email").trim().toLowerCase())) {
+        notice('<div class="notice notice--err">此電子郵件已註冊，請直接登入。</div>'); return;
+      }
+      const member = { display_name: val("name").trim(), phone: val("phone").trim(), email: val("email").trim(), password: val("password") };
+      list.push(member);
+      localStorage.setItem("miglow_members", JSON.stringify(list));
+      window.MG.session.login({ display_name: member.display_name, email: member.email, phone: member.phone });
+      location.href = "member.html";
+    });
+  }
+
+  /* ---------------- 忘記密碼 ---------------- */
+  function initForgot() {
+    const form = document.getElementById("forgotForm");
+    if (!form) return;
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!validate([["email", (v) => emailRe.test(v), "請輸入有效的電子郵件"]])) return;
+      form.reset();
+      notice('<div class="notice notice--ok">若此信箱已註冊，重設密碼連結將寄至您的信箱。（原型展示）</div>');
+    });
+  }
+
+  /* ---------------- 會員中心 ---------------- */
+  function initMember() {
+    const root = document.getElementById("memberRoot");
+    if (!root) return;
+    const me = window.MG.session.get();
+
+    if (!me) {
+      root.innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5S20 17 20 21"/></svg>
+          <h3>請先登入</h3>
+          <p>登入後即可查看會員資料與訂單。</p>
+          <a href="login.html" class="btn btn--solid">前往登入</a>
+        </div>`;
+      return;
+    }
+
+    const orders = window.MG.orders.all();
+    const ST = window.MG.ORDER_STATUS;
+    const money = (n) => window.MG.money(n);
+
+    const ordersHtml = orders.length
+      ? `<table class="order-table">
+          <thead><tr><th>訂單編號</th><th>日期</th><th>金額</th><th>狀態</th><th></th></tr></thead>
+          <tbody>${orders.map((o) => `
+            <tr>
+              <td data-label="訂單編號">${o.order_no}</td>
+              <td data-label="日期">${window.MG.dateFmt(o.created_at)}</td>
+              <td data-label="金額">${money(o.total)}</td>
+              <td data-label="狀態"><span class="status-tag" data-s="${o.order_status}">${ST[o.order_status] || o.order_status}</span></td>
+              <td data-label=""><a href="order-complete.html?no=${o.order_no}" style="color:var(--accent)">查看</a></td>
+            </tr>`).join("")}
+          </tbody>
+         </table>`
+      : `<div class="empty-state" style="padding:40px 0"><p>目前還沒有訂單。</p><a href="products.html" class="btn btn--ghost">去逛逛</a></div>`;
+
+    root.innerHTML = `
+      <div class="account-layout">
+        <nav class="account-nav">
+          <a href="#" class="is-active" data-tab="profile">${window.MIGLOW_ICON.member}會員資料</a>
+          <a href="#" data-tab="orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>我的訂單</a>
+          <a href="#" data-tab="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M15 12H4m0 0 3.5-3.5M4 12l3.5 3.5M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4"/></svg>登出</a>
+        </nav>
+        <div>
+          <div class="account-card" data-panel="profile">
+            <h2>會員資料</h2>
+            <div class="info-grid">
+              <div class="info-cell"><div class="k">姓名</div><div class="v">${me.display_name || "—"}</div></div>
+              <div class="info-cell"><div class="k">電子郵件</div><div class="v">${me.email || "—"}</div></div>
+              <div class="info-cell"><div class="k">手機</div><div class="v">${me.phone || "—"}</div></div>
+              <div class="info-cell"><div class="k">會員等級</div><div class="v">一般會員</div></div>
+            </div>
+          </div>
+          <div class="account-card" data-panel="orders" hidden>
+            <h2>我的訂單</h2>
+            ${ordersHtml}
+          </div>
+        </div>
+      </div>`;
+
+    root.querySelectorAll("[data-tab]").forEach((a) =>
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        const tab = a.dataset.tab;
+        if (tab === "logout") {
+          window.MG.session.logout();
+          window.MG.toast("已登出");
+          setTimeout(() => (location.href = "index.html"), 600);
+          return;
+        }
+        root.querySelectorAll("[data-tab]").forEach((x) => x.classList.toggle("is-active", x === a));
+        root.querySelectorAll("[data-panel]").forEach((p) => (p.hidden = p.dataset.panel !== tab));
+      })
+    );
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    initPasswordToggles();
+    initLogin();
+    initRegister();
+    initForgot();
+    initMember();
+  });
+})();

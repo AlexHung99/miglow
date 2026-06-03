@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>聯絡我們｜微光 MI GLOW</title>
+  <meta name="description" content="與微光 MI GLOW 聯絡：電話、Email、LINE、工作室資訊與聯絡表單。大量訂購與企業送禮歡迎洽詢。">
+  <meta name="theme-color" content="#F4EFE7">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Sans+TC:wght@300;400;500&family=Noto+Serif+TC:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/components.js" defer></script>
+  <script src="assets/js/store.js" defer></script>
+  <script src="assets/js/content.js" defer></script>
+</head>
+<body data-page="contact">
+  <header class="site-header" id="site-header"></header>
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <h1 class="zh">聯絡我們</h1>
+        <span class="en">Contact Us</span>
+        <p class="desc">有任何問題或大量訂購需求，歡迎透過以下方式與微光聯繫。</p>
+        <nav class="breadcrumb"><a href="index.html">首頁</a><span>/</span>聯絡我們</nav>
+      </div>
+    </section>
+
+    <section class="page-section">
+      <div class="container">
+        <div class="contact-layout">
+          <div class="contact-info" id="contactInfo"></div>
+          <div>
+            <div id="contactNotice"></div>
+            <form class="form" id="contactForm" novalidate>
+              <div class="form-row">
+                <div class="field">
+                  <label for="cName">姓名<span class="req">*</span></label>
+                  <input class="input" id="cName" name="name" type="text" autocomplete="name">
+                  <div class="field-error"></div>
+                </div>
+                <div class="field">
+                  <label for="cPhone">電話<span class="req">*</span></label>
+                  <input class="input" id="cPhone" name="phone" type="tel" autocomplete="tel">
+                  <div class="field-error"></div>
+                </div>
+              </div>
+              <div class="field">
+                <label for="cEmail">電子信箱<span class="req">*</span></label>
+                <input class="input" id="cEmail" name="email" type="email" autocomplete="email">
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="cSubject">主旨</label>
+                <input class="input" id="cSubject" name="subject" type="text">
+              </div>
+              <div class="field">
+                <label for="cMsg">訊息內容<span class="req">*</span></label>
+                <textarea class="textarea" id="cMsg" name="message"></textarea>
+                <div class="field-error"></div>
+              </div>
+              <button class="btn btn--solid btn--block" type="submit">送出訊息</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer" id="site-footer"></footer>
+</body>
+</html>

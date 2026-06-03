@@ -1,0 +1,34 @@
+{
+  "brand": {
+    "name_zh": "微光",
+    "name_en": "MI GLOW",
+    "slogan": "微光・甜在心裡的幸福",
+    "tagline": "在日常裡，留一點微光的甜"
+  },
+  "contact": {
+    "phone": "0900-000-000",
+    "email": "hello@miglow.com",
+    "line_id": "@miglow",
+    "address": "台北市・微光手作甜點工作室",
+    "hours": "週二至週六 11:00 – 19:00"
+  },
+  "social": {
+    "instagram": "https://www.instagram.com/miglow.cw",
+    "facebook": "https://www.facebook.com/miglow",
+    "line": "https://line.me/R/ti/p/@miglow"
+  },
+  "payment": {
+    "bank_name": "國泰世華銀行 (013)",
+    "bank_account": "0000-0000-00000",
+    "account_name": "微光手作甜點有限公司",
+    "free_shipping_threshold": 1200,
+    "shipping_fee": 160
+  },
+  "features": [
+    { "icon": "leaf",  "title": "嚴選食材", "desc": "精選天然原料，純粹不馬虎" },
+    { "icon": "hand",  "title": "手工製作", "desc": "小批次手作，溫度與心意同在" },
+    { "icon": "gift",  "title": "精美包裝", "desc": "質感禮盒，傳遞每一份心意" },
+    { "icon": "truck", "title": "快速出貨", "desc": "新鮮現做，下單後盡快寄出" }
+  ],
+  "copyright": "© 2026 微光 MI GLOW. All rights reserved."
+}
