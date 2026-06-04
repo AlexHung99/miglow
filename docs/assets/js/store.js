@@ -115,5 +115,24 @@
     preparing: "備貨中", shipped: "已出貨", completed: "已完成", cancelled: "已取消"
   };
 
+  /* ---- 讀取後台發佈的 JSON 覆蓋 MIGLOW_DATA（讀不到則沿用 data.js）----
+   * 後台「發佈」會把最新內容寫到 data/*.json 並 push 到 GitHub Pages。
+   * 例：MG.loadPublished('products', 'data/products.json', renderFn)
+   */
+  MG.loadPublished = function (key, file, cb) {
+    var done = function () { try { cb && cb(); } catch (e) {} };
+    if (!window.fetch) { return done(); }
+    try {
+      fetch(file, { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (json) {
+          var ok = json && (Array.isArray(json) ? json.length > 0 : Object.keys(json).length > 0);
+          if (ok) { (window.MIGLOW_DATA = window.MIGLOW_DATA || {})[key] = json; }
+        })
+        .catch(function () {})
+        .then(done, done);
+    } catch (e) { done(); }
+  };
+
   window.MG = MG;
 })();

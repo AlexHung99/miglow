@@ -146,7 +146,9 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    initList();
-    initDetail();
+    function go() { initList(); initDetail(); }
+    // 先讀後台發佈的 products.json（讀不到則沿用 data.js），再渲染
+    if (window.MG && MG.loadPublished) MG.loadPublished("products", "data/products.json", go);
+    else go();
   });
 })();

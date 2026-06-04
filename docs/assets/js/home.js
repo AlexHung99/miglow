@@ -139,12 +139,18 @@
       .join("");
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
+  function renderAll() {
     renderHero();
     renderProducts();
     renderFeatures();
     renderInstagram();
     // 動態內容渲染完成後，重新觀察新加入的 .reveal 元素（避免商品/特色卡停在不可見狀態）
     if (window.MIGLOW_bindReveal) window.MIGLOW_bindReveal();
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // 先讀後台發佈的 products.json（讀不到則沿用 data.js），再渲染
+    if (window.MG && MG.loadPublished) MG.loadPublished("products", "data/products.json", renderAll);
+    else renderAll();
   });
 })();
