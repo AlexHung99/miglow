@@ -149,8 +149,15 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    // 先讀後台發佈的 products.json（讀不到則沿用 data.js），再渲染
-    if (window.MG && MG.loadPublished) MG.loadPublished("products", "data/products.json", renderAll);
-    else renderAll();
+    // 先讀後台發佈的 products / banners / site（讀不到則沿用 data.js），再渲染
+    if (window.MG && MG.loadPublished) {
+      MG.loadPublished("products", "data/products.json", function () {
+        MG.loadPublished("banners", "data/banners.json", function () {
+          MG.loadPublished("site", "data/site.json", renderAll);
+        });
+      });
+    } else {
+      renderAll();
+    }
   });
 })();

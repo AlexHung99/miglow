@@ -192,7 +192,7 @@
   window.MIGLOW_bindReveal = bindReveal;
 
   /* ---- 初始化 ---- */
-  document.addEventListener("DOMContentLoaded", function () {
+  function initLayout() {
     const active = document.body.dataset.page || "";
     const header = document.getElementById("site-header");
     const footer = document.getElementById("site-footer");
@@ -207,5 +207,11 @@
     bindNav();
     updateCartBadge();
     bindReveal();
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // 先讀後台發佈的 site.json（品牌/聯絡/社群/頁尾），讀不到則沿用 data.js
+    if (window.MG && MG.loadPublished) MG.loadPublished("site", "data/site.json", initLayout);
+    else initLayout();
   });
 })();

@@ -118,10 +118,16 @@
     });
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
+  function initAll() {
     initAbout();
     initOrdering();
     initFaq();
     initContact();
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // 先讀後台發佈的 site.json（聯絡/社群），讀不到則沿用 data.js
+    if (window.MG && MG.loadPublished) MG.loadPublished("site", "data/site.json", initAll);
+    else initAll();
   });
 })();
