@@ -77,8 +77,14 @@
     el.setAttribute("content", val || "");
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
+  function initAll() {
     initList();
     initDetail();
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // 先讀後台發佈的 news.json（讀不到則沿用 data.js），再渲染
+    if (window.MG && MG.loadPublished) MG.loadPublished("news", "data/news.json", initAll);
+    else initAll();
   });
 })();
