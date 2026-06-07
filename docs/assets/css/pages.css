@@ -298,3 +298,9 @@
   .order-table td { border: none; padding: 8px 14px; display: flex; justify-content: space-between; }
   .order-table td::before { content: attr(data-label); color: var(--ink-soft); }
 }
+
+/* 會員登入/註冊：Google 按鈕上方的「或」分隔線 */
+.auth-or { display: flex; align-items: center; text-align: center; color: #b9b2a8; font-size: 13px; margin: 16px 0 4px; }
+.auth-or::before, .auth-or::after { content: ""; flex: 1; height: 1px; background: #e7e1d8; }
+.auth-or span { padding: 0 12px; }
+.google-signin { min-height: 40px; }

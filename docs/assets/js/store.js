@@ -8,7 +8,32 @@
   const D = window.MIGLOW_DATA || {};
   const KEY_CART = "miglow_cart";
   const KEY_SESSION = "miglow_session";
+  const KEY_TOKEN = "miglow_token";
   const KEY_ORDERS = "miglow_orders";
+
+  /* ---- 後端 API 位址（會員註冊/登入）----
+   * 靜態前台（GitHub Pages）需指向 Optimind 後端網址。
+   * 部署時把 window.MIGLOW_API_BASE 設成你的 Optimind 網址即可，例如：
+   *   <script>window.MIGLOW_API_BASE = "https://your-optimind-host";</script>
+   * 預設留空＝同源（僅在從 Optimind 站台直接開啟時可用）。 */
+  function apiBase() {
+    return String(window.MIGLOW_API_BASE || "").replace(/\/+$/, "");
+  }
+  function authUrl(method) {
+    return apiBase() + "/web/Service/wsMGAUTH.asmx/" + method;
+  }
+  function authPost(method, payload) {
+    return fetch(authUrl(method), {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify(payload)
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        var raw = j && j.d != null ? j.d : j;
+        return typeof raw === "string" ? JSON.parse(raw) : raw; // { ok, token, member, error }
+      });
+  }
 
   function read(key, fallback) {
     try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch (e) { return fallback; }
@@ -60,12 +85,28 @@
       return subtotal >= threshold ? 0 : fee;
     },
 
-    /* ---- 登入狀態（mock） ---- */
+    /* ---- 登入狀態（後端 token） ---- */
     session: {
       get() { return read(KEY_SESSION, null); },
-      login(member) { write(KEY_SESSION, member); },
-      logout() { localStorage.removeItem(KEY_SESSION); },
+      login(member, token) { write(KEY_SESSION, member); if (token) localStorage.setItem(KEY_TOKEN, token); },
+      token() { return localStorage.getItem(KEY_TOKEN) || ""; },
+      logout() { localStorage.removeItem(KEY_SESSION); localStorage.removeItem(KEY_TOKEN); },
       isLoggedIn() { return !!read(KEY_SESSION, null); }
+    },
+
+    /* ---- 會員認證 API（打 Optimind wsMGAUTH.asmx）---- */
+    auth: {
+      register(email, password, display_name, phone) {
+        return authPost("Register", { email: email, password: password, display_name: display_name, phone: phone });
+      },
+      login(email, password) {
+        return authPost("Login", { email: email, password: password });
+      },
+      loginWithGoogle(idToken) {
+        return authPost("LoginWithGoogle", { idToken: idToken });
+      },
+      me(token) { return authPost("Me", { token: token }); },
+      logout(token) { return authPost("Logout", { token: token }); }
     },
 
     /* ---- 訂單（mock） ---- */

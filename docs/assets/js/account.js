@@ -1,7 +1,7 @@
 /* =============================================================================
- * 微光 MI GLOW — 會員：登入 / 註冊 / 忘記密碼 / 會員中心（原型 mock）
- * 註冊會員存於 localStorage(miglow_members)，登入狀態存於 miglow_session。
- * 皆為前端原型，正式版改打 /api/auth/*。
+ * 微光 MI GLOW — 會員：登入 / 註冊 / 忘記密碼 / 會員中心
+ * 登入/註冊改打 Optimind 後端 wsMGAUTH.asmx（MG.auth）；登入狀態+token 存於 localStorage。
+ * 忘記密碼仍為原型（待接 Email 重設）。
  * ========================================================================== */
 (function () {
   "use strict";
@@ -48,15 +48,23 @@
         ["password", (v) => v.length >= 6, "密碼至少 6 碼"]
       ])) return;
 
-      const email = val("email").trim().toLowerCase();
-      const found = members().find((m) => m.email.toLowerCase() === email);
-      if (found && found.password !== val("password")) {
-        notice('<div class="notice notice--err">密碼錯誤，請再試一次。</div>'); return;
-      }
-      // 原型：未註冊的 email 也允許快速登入展示
-      const me = found || { display_name: email.split("@")[0], email: val("email").trim(), phone: "" };
-      window.MG.session.login({ display_name: me.display_name, email: me.email, phone: me.phone });
-      location.href = "member.html";
+      const btn = form.querySelector('[type="submit"]');
+      if (btn) btn.disabled = true;
+      notice('<div class="notice">登入中…</div>');
+      window.MG.auth.login(val("email").trim(), val("password"))
+        .then((res) => {
+          if (!res || !res.ok) {
+            notice('<div class="notice notice--err">' + ((res && res.error) || "登入失敗") + "</div>");
+            if (btn) btn.disabled = false;
+            return;
+          }
+          window.MG.session.login(res.member, res.token);
+          location.href = "member.html";
+        })
+        .catch(() => {
+          notice('<div class="notice notice--err">無法連線到伺服器，請稍後再試。</div>');
+          if (btn) btn.disabled = false;
+        });
     });
   }
 
@@ -77,15 +85,23 @@
       if (!agree.checked) { ok = false; notice('<div class="notice notice--err">請先同意隱私權政策與服務條款。</div>'); }
       if (!ok) return;
 
-      const list = members();
-      if (list.some((m) => m.email.toLowerCase() === val("email").trim().toLowerCase())) {
-        notice('<div class="notice notice--err">此電子郵件已註冊，請直接登入。</div>'); return;
-      }
-      const member = { display_name: val("name").trim(), phone: val("phone").trim(), email: val("email").trim(), password: val("password") };
-      list.push(member);
-      localStorage.setItem("miglow_members", JSON.stringify(list));
-      window.MG.session.login({ display_name: member.display_name, email: member.email, phone: member.phone });
-      location.href = "member.html";
+      const btn = form.querySelector('[type="submit"]');
+      if (btn) btn.disabled = true;
+      notice('<div class="notice">註冊中…</div>');
+      window.MG.auth.register(val("email").trim(), val("password"), val("name").trim(), val("phone").trim())
+        .then((res) => {
+          if (!res || !res.ok) {
+            notice('<div class="notice notice--err">' + ((res && res.error) || "註冊失敗") + "</div>");
+            if (btn) btn.disabled = false;
+            return;
+          }
+          window.MG.session.login(res.member, res.token);
+          location.href = "member.html";
+        })
+        .catch(() => {
+          notice('<div class="notice notice--err">無法連線到伺服器，請稍後再試。</div>');
+          if (btn) btn.disabled = false;
+        });
     });
   }
 
@@ -166,6 +182,8 @@
         e.preventDefault();
         const tab = a.dataset.tab;
         if (tab === "logout") {
+          const t = window.MG.session.token();
+          if (window.MG.auth && t) { try { window.MG.auth.logout(t); } catch (err) {} }
           window.MG.session.logout();
           window.MG.toast("已登出");
           setTimeout(() => (location.href = "index.html"), 600);
@@ -177,11 +195,43 @@
     );
   }
 
+  /* ---------------- Google 登入 ---------------- */
+  function handleGoogleCredential(response) {
+    if (!response || !response.credential) return;
+    notice('<div class="notice">Google 驗證中…</div>');
+    window.MG.auth.loginWithGoogle(response.credential)
+      .then((res) => {
+        if (!res || !res.ok) { notice('<div class="notice notice--err">' + ((res && res.error) || "Google 登入失敗") + "</div>"); return; }
+        window.MG.session.login(res.member, res.token);
+        location.href = "member.html";
+      })
+      .catch(() => { notice('<div class="notice notice--err">無法連線到伺服器，請稍後再試。</div>'); });
+  }
+
+  function initGoogleSignin() {
+    const containers = document.querySelectorAll(".google-signin");
+    if (!containers.length) return;
+    const cid = window.MIGLOW_GOOGLE_CLIENT_ID || "";
+    if (!cid) return; // 未設定 Client ID 就不顯示 Google 按鈕
+    let tries = 0;
+    (function ready() {
+      if (window.google && google.accounts && google.accounts.id) {
+        google.accounts.id.initialize({ client_id: cid, callback: handleGoogleCredential });
+        containers.forEach((c) =>
+          google.accounts.id.renderButton(c, { theme: "outline", size: "large", text: "continue_with", shape: "pill", width: 280 })
+        );
+      } else if (tries++ < 40) {
+        setTimeout(ready, 150);
+      }
+    })();
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     initPasswordToggles();
     initLogin();
     initRegister();
     initForgot();
     initMember();
+    initGoogleSignin();
   });
 })();

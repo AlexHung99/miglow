@@ -13,8 +13,10 @@
   <link rel="stylesheet" href="assets/css/pages.css">
   <script src="assets/js/data.js" defer></script>
   <script src="assets/js/components.js" defer></script>
+  <script src="assets/js/config.js" defer></script>
   <script src="assets/js/store.js" defer></script>
   <script src="assets/js/account.js" defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body data-page="account">
   <header class="site-header" id="site-header"></header>
@@ -62,6 +64,8 @@
               </label>
               <button class="btn btn--solid btn--block" type="submit">註冊</button>
             </form>
+            <div class="auth-or"><span>或</span></div>
+            <div class="google-signin" style="display:flex;justify-content:center;margin:6px 0 4px;"></div>
             <div class="auth-foot">已有帳號？<a href="login.html">前往登入</a></div>
           </div>
         </div>
