@@ -22,8 +22,8 @@
   function authUrl(method) {
     return apiBase() + "/web/Service/wsMGAUTH.asmx/" + method;
   }
-  function authPost(method, payload) {
-    return fetch(authUrl(method), {
+  function apiPost(service, method, payload) {
+    return fetch(apiBase() + "/web/Service/" + service + "/" + method, {
       method: "POST",
       headers: { "Content-Type": "application/json; charset=utf-8" },
       body: JSON.stringify(payload)
@@ -31,9 +31,11 @@
       .then(function (r) { return r.json(); })
       .then(function (j) {
         var raw = j && j.d != null ? j.d : j;
-        return typeof raw === "string" ? JSON.parse(raw) : raw; // { ok, token, member, error }
+        return typeof raw === "string" ? JSON.parse(raw) : raw;
       });
   }
+  function authPost(method, payload) { return apiPost("wsMGAUTH.asmx", method, payload); }
+  function shopPost(method, payload) { return apiPost("wsMGSHOP.asmx", method, payload); }
 
   function read(key, fallback) {
     try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch (e) { return fallback; }
@@ -111,27 +113,13 @@
       resetPassword(token, newPassword) { return authPost("ResetPassword", { token: token, newPassword: newPassword }); }
     },
 
-    /* ---- 訂單（mock） ---- */
+    /* ---- 訂單（後端 wsMGSHOP，需登入 token）。皆回 Promise ---- */
     orders: {
-      all() { return read(KEY_ORDERS, []); },
-      get(no) { return MG.orders.all().find((o) => o.order_no === no); },
-      create(order) {
-        const list = MG.orders.all();
-        const seq = String(list.length + 1).padStart(4, "0");
-        const d = new Date();
-        const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-        order.order_no = `MG${ymd}-${seq}`;
-        order.created_at = d.toISOString();
-        order.order_status = "pending";
-        list.unshift(order);
-        write(KEY_ORDERS, list);
-        return order;
-      },
-      update(no, patch) {
-        const list = MG.orders.all();
-        const o = list.find((x) => x.order_no === no);
-        if (o) { Object.assign(o, patch); write(KEY_ORDERS, list); }
-        return o;
+      myOrders() { return shopPost("GetMyOrders", { token: MG.session.token() }); },
+      get(no) { return shopPost("GetOrder", { token: MG.session.token(), orderNo: no }); },
+      create(order) { return shopPost("CreateOrder", { token: MG.session.token(), json: JSON.stringify(order) }); },
+      reportPayment(no, pay) {
+        return shopPost("ReportPayment", { token: MG.session.token(), json: JSON.stringify(Object.assign({ order_no: no }, pay)) });
       }
     }
   };

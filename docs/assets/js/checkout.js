@@ -10,6 +10,17 @@
   function initCheckout() {
     const root = document.getElementById("checkoutRoot");
     if (!root) return;
+
+    if (!window.MG.session.isLoggedIn()) {
+      root.innerHTML = `
+        <div class="empty-state">
+          <h3>請先登入會員</h3>
+          <p>登入後即可結帳，並在會員中心追蹤訂單狀態。</p>
+          <a href="login.html" class="btn btn--solid">前往登入</a>
+        </div>`;
+      return;
+    }
+
     const items = window.MG.cart.get();
 
     if (!items.length) {
@@ -99,36 +110,54 @@
         document.getElementById("checkoutNotice").innerHTML = '<div class="notice notice--err" style="margin-bottom:14px">請確認必填欄位</div>';
         return;
       }
-      const order = window.MG.orders.create({
+      const notice = document.getElementById("checkoutNotice");
+      const btn = e.target.querySelector('[type="submit"]');
+      if (btn) btn.disabled = true;
+      if (notice) notice.innerHTML = '<div class="notice" style="margin-bottom:14px">送出中…</div>';
+      window.MG.orders.create({
         orderer: { name: val("oName"), phone: val("oPhone"), email: val("oEmail") },
         receiver: { name: val("rName"), phone: val("rPhone"), address: val("rAddr") },
         shipping_method: val("ship"),
         note: val("note"),
-        items: items,
-        subtotal, shipping, total
+        items: items
+      }).then((res) => {
+        if (!res || !res.ok) {
+          if (notice) notice.innerHTML = '<div class="notice notice--err" style="margin-bottom:14px">' + ((res && res.error) || "下單失敗") + "</div>";
+          if (btn) btn.disabled = false;
+          return;
+        }
+        window.MG.cart.clear();
+        location.href = "order-complete.html?no=" + encodeURIComponent(res.order_no);
+      }).catch(() => {
+        if (notice) notice.innerHTML = '<div class="notice notice--err" style="margin-bottom:14px">無法連線伺服器，請稍後再試。</div>';
+        if (btn) btn.disabled = false;
       });
-      window.MG.cart.clear();
-      location.href = "order-complete.html?no=" + encodeURIComponent(order.order_no);
     });
   }
 
   /* =============== 訂單成立 / 後五碼 =============== */
+  function notFoundHtml() {
+    return `<div class="empty-state"><h3>找不到訂單</h3><p>訂單可能已失效，或連結不正確。</p><a href="products.html" class="btn btn--solid">繼續購物</a></div>`;
+  }
+
   function initOrderDone() {
     const root = document.getElementById("orderDoneRoot");
     if (!root) return;
     const no = window.MG.qs("no");
-    const order = no && window.MG.orders.get(no);
-
-    if (!order) {
-      root.innerHTML = `<div class="empty-state"><h3>找不到訂單</h3><p>訂單可能已失效，或連結不正確。</p><a href="products.html" class="btn btn--solid">繼續購物</a></div>`;
+    if (!no) { root.innerHTML = notFoundHtml(); return; }
+    if (!window.MG.session.isLoggedIn()) {
+      root.innerHTML = `<div class="empty-state"><h3>請先登入</h3><p>登入後即可查看此訂單。</p><a href="login.html" class="btn btn--solid">前往登入</a></div>`;
       return;
     }
-    renderOrder(root, order);
+    window.MG.orders.get(no).then((res) => {
+      if (!res || !res.ok) { root.innerHTML = notFoundHtml(); return; }
+      renderOrder(root, res.order, res.items);
+    }).catch(() => { root.innerHTML = notFoundHtml(); });
   }
 
-  function renderOrder(root, order) {
+  function renderOrder(root, order, items) {
     const pay = window.MG.payment();
-    const reported = order.order_status !== "pending" && order.payment;
+    const reported = order.order_status !== "pending";
 
     root.innerHTML = `
       <div class="order-done">
@@ -161,7 +190,7 @@
     if (reported) {
       payArea.innerHTML = `
         <div class="notice notice--ok" style="text-align:left">
-          ✓ 我們已收到您的匯款資訊（帳號後五碼 ${order.payment.account_last5}），將盡快為您確認款項並安排出貨。
+          ✓ 我們已收到您的匯款資訊（帳號後五碼 ${order.pay_account_last5}），將盡快為您確認款項並安排出貨。
         </div>
         <div style="margin-top:22px"><a href="member.html" class="btn btn--ghost">查看我的訂單</a></div>`;
       return;
@@ -196,12 +225,22 @@
         document.getElementById("payNotice").innerHTML = '<div class="notice notice--err">請確認欄位填寫正確</div>';
         return;
       }
-      window.MG.orders.update(order.order_no, {
-        order_status: "reported",
-        payment: { account_last5: val("last5"), paid_amount: Number(val("payAmt")), paid_date: val("payDate"), payer_note: val("payNote") }
+      const pbtn = e.target.querySelector('[type="submit"]');
+      if (pbtn) pbtn.disabled = true;
+      window.MG.orders.reportPayment(order.order_no, {
+        account_last5: val("last5"), paid_amount: Number(val("payAmt")), paid_date: val("payDate"), payer_note: val("payNote")
+      }).then((res) => {
+        if (!res || !res.ok) {
+          document.getElementById("payNotice").innerHTML = '<div class="notice notice--err">' + ((res && res.error) || "送出失敗") + "</div>";
+          if (pbtn) pbtn.disabled = false;
+          return;
+        }
+        window.MG.toast("已送出匯款資訊");
+        window.MG.orders.get(order.order_no).then((r2) => { if (r2 && r2.ok) renderOrder(root, r2.order, r2.items); });
+      }).catch(() => {
+        document.getElementById("payNotice").innerHTML = '<div class="notice notice--err">無法連線伺服器，請稍後再試。</div>';
+        if (pbtn) pbtn.disabled = false;
       });
-      window.MG.toast("已送出匯款資訊");
-      renderOrder(root, window.MG.orders.get(order.order_no));
     });
   }
 

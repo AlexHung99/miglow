@@ -181,12 +181,13 @@
       return;
     }
 
-    const orders = window.MG.orders.all();
     const ST = window.MG.ORDER_STATUS;
     const money = (n) => window.MG.money(n);
-
-    const ordersHtml = orders.length
-      ? `<table class="order-table">
+    function ordersTable(orders) {
+      if (!orders || !orders.length) {
+        return `<div class="empty-state" style="padding:40px 0"><p>目前還沒有訂單。</p><a href="products.html" class="btn btn--ghost">去逛逛</a></div>`;
+      }
+      return `<table class="order-table">
           <thead><tr><th>訂單編號</th><th>日期</th><th>金額</th><th>狀態</th><th></th></tr></thead>
           <tbody>${orders.map((o) => `
             <tr>
@@ -197,8 +198,9 @@
               <td data-label=""><a href="order-complete.html?no=${o.order_no}" style="color:var(--accent)">查看</a></td>
             </tr>`).join("")}
           </tbody>
-         </table>`
-      : `<div class="empty-state" style="padding:40px 0"><p>目前還沒有訂單。</p><a href="products.html" class="btn btn--ghost">去逛逛</a></div>`;
+         </table>`;
+    }
+    const ordersHtml = '<div id="memberOrders" style="color:#999;padding:20px 0">載入中…</div>';
 
     root.innerHTML = `
       <div class="account-layout">
@@ -240,6 +242,19 @@
         root.querySelectorAll("[data-panel]").forEach((p) => (p.hidden = p.dataset.panel !== tab));
       })
     );
+
+    // 非同步載入「我的訂單」（後端 wsMGSHOP）
+    window.MG.orders.myOrders()
+      .then((res) => {
+        const box = document.getElementById("memberOrders");
+        if (!box) return;
+        if (res && res.ok) box.outerHTML = ordersTable(res.orders);
+        else box.innerHTML = '<p style="color:#c0392b">訂單載入失敗：' + ((res && res.error) || "") + "</p>";
+      })
+      .catch(() => {
+        const box = document.getElementById("memberOrders");
+        if (box) box.innerHTML = '<p style="color:#c0392b">無法連線伺服器</p>';
+      });
   }
 
   /* ---------------- Google 登入 ---------------- */
