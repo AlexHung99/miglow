@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /login.html
+Disallow: /register.html
+Disallow: /forgot-password.html
+Disallow: /reset-password.html
+Disallow: /member.html
+Disallow: /cart.html
+Disallow: /checkout.html
+Disallow: /order-complete.html
+Sitemap: https://miglow.vip/sitemap.xml
