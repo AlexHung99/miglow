@@ -106,7 +106,9 @@
         return authPost("LoginWithGoogle", { idToken: idToken });
       },
       me(token) { return authPost("Me", { token: token }); },
-      logout(token) { return authPost("Logout", { token: token }); }
+      logout(token) { return authPost("Logout", { token: token }); },
+      requestPasswordReset(email) { return authPost("RequestPasswordReset", { email: email }); },
+      resetPassword(token, newPassword) { return authPost("ResetPassword", { token: token, newPassword: newPassword }); }
     },
 
     /* ---- 訂單（mock） ---- */

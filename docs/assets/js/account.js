@@ -112,8 +112,55 @@
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       if (!validate([["email", (v) => emailRe.test(v), "請輸入有效的電子郵件"]])) return;
-      form.reset();
-      notice('<div class="notice notice--ok">若此信箱已註冊，重設密碼連結將寄至您的信箱。（原型展示）</div>');
+      const btn = form.querySelector('[type="submit"]');
+      if (btn) btn.disabled = true;
+      notice('<div class="notice">寄送中…</div>');
+      window.MG.auth.requestPasswordReset(val("email").trim())
+        .then(() => {
+          form.reset();
+          notice('<div class="notice notice--ok">若此信箱已註冊，重設密碼連結已寄出，請至信箱查收（含垃圾信匣）。</div>');
+          if (btn) btn.disabled = false;
+        })
+        .catch(() => {
+          notice('<div class="notice notice--err">無法連線到伺服器，請稍後再試。</div>');
+          if (btn) btn.disabled = false;
+        });
+    });
+  }
+
+  /* ---------------- 重設密碼（reset-password.html）---------------- */
+  function initReset() {
+    const form = document.getElementById("resetForm");
+    if (!form) return;
+    const token = new URLSearchParams(location.search).get("token") || "";
+    if (!token) {
+      notice('<div class="notice notice--err">連結無效，請重新申請忘記密碼。</div>');
+      form.style.display = "none";
+      return;
+    }
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!validate([
+        ["password", (v) => v.length >= 6, "密碼至少 6 碼"],
+        ["password2", (v) => v === val("password"), "兩次密碼不一致"]
+      ])) return;
+      const btn = form.querySelector('[type="submit"]');
+      if (btn) btn.disabled = true;
+      notice('<div class="notice">處理中…</div>');
+      window.MG.auth.resetPassword(token, val("password"))
+        .then((res) => {
+          if (!res || !res.ok) {
+            notice('<div class="notice notice--err">' + ((res && res.error) || "重設失敗") + "</div>");
+            if (btn) btn.disabled = false;
+            return;
+          }
+          form.style.display = "none";
+          notice('<div class="notice notice--ok">密碼已重設！請用新密碼登入。<br><a href="login.html" class="btn btn--solid" style="margin-top:10px">前往登入</a></div>');
+        })
+        .catch(() => {
+          notice('<div class="notice notice--err">無法連線到伺服器，請稍後再試。</div>');
+          if (btn) btn.disabled = false;
+        });
     });
   }
 
@@ -231,6 +278,7 @@
     initLogin();
     initRegister();
     initForgot();
+    initReset();
     initMember();
     initGoogleSignin();
   });
