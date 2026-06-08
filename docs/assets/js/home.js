@@ -75,7 +75,7 @@
       .map(
         (p) => `
         <article class="product-card reveal">
-          <a class="product-card__media" href="product.html?slug=${p.slug}" aria-label="${p.name_zh}">
+          <a class="product-card__media" href="p/${p.slug}.html" aria-label="${p.name_zh}">
             <img src="${p.image_path}" alt="${p.name_zh}" loading="lazy">
           </a>
           <div class="product-card__body">

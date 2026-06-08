@@ -60,9 +60,9 @@
   function rowHtml(it) {
     return `
       <div class="cart-row" data-uid="${it.product_uid}">
-        <a class="cart-row__img" href="product.html?slug=${it.slug}"><img src="${it.image_path}" alt="${it.name_zh}"></a>
+        <a class="cart-row__img" href="p/${it.slug}.html"><img src="${it.image_path}" alt="${it.name_zh}"></a>
         <div>
-          <a class="cart-row__name" href="product.html?slug=${it.slug}">${it.name_zh}</a>
+          <a class="cart-row__name" href="p/${it.slug}.html">${it.name_zh}</a>
           <div class="cart-row__price">${money(it.price)} / 盒</div>
           <div class="qty" style="margin-top:10px">
             <button type="button" data-q="-1" aria-label="減少">−</button>

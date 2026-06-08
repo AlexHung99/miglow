@@ -8,6 +8,21 @@
 (function () {
   "use strict";
 
+  /* ---- Google Analytics 4（每頁載入 components.js 即啟用，含靜態商品/消息頁）---- */
+  (function () {
+    var GA_ID = "G-RH9N8KEM7Z";
+    if (window.__miglowGaLoaded) return;
+    window.__miglowGaLoaded = true;
+    var s = document.createElement("script");
+    s.async = true;
+    s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { dataLayer.push(arguments); };
+    gtag("js", new Date());
+    gtag("config", GA_ID);
+  })();
+
   /* 確認瀏覽器支援後才啟用淡入動畫；否則 CSS 維持內容可見（永不卡白畫面）。 */
   if ("IntersectionObserver" in window) document.documentElement.classList.add("js-anim");
 

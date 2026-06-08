@@ -8,7 +8,7 @@
 
   function card(n) {
     return `
-      <a class="news-card reveal" href="news-detail.html?slug=${n.slug}">
+      <a class="news-card reveal" href="n/${n.slug}.html">
         <div class="news-card__media"><img src="${n.cover_image_path}" alt="${n.title}" loading="lazy"></div>
         <div class="news-card__body">
           <div class="news-card__cat">${n.category}</div>
