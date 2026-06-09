@@ -148,8 +148,9 @@
         }
         window.MG.cart.clear();
         location.href = "order-complete.html?no=" + encodeURIComponent(res.order_no);
-      }).catch(() => {
-        if (notice) notice.innerHTML = '<div class="notice notice--err" style="margin-bottom:14px">無法連線伺服器，請稍後再試。</div>';
+      }).catch((err) => {
+        const reason = err && err.message ? "：" + err.message : "，請稍後再試。";
+        if (notice) notice.innerHTML = '<div class="notice notice--err" style="margin-bottom:14px">送出訂單失敗' + reason + '</div>';
         if (btn) btn.disabled = false;
       });
     });
@@ -257,8 +258,9 @@
         }
         window.MG.toast("已送出匯款資訊");
         window.MG.orders.get(order.order_no).then((r2) => { if (r2 && r2.ok) renderOrder(root, r2.order, r2.items); });
-      }).catch(() => {
-        document.getElementById("payNotice").innerHTML = '<div class="notice notice--err">無法連線伺服器，請稍後再試。</div>';
+      }).catch((err) => {
+        const reason = err && err.message ? "：" + err.message : "，請稍後再試。";
+        document.getElementById("payNotice").innerHTML = '<div class="notice notice--err">送出失敗' + reason + '</div>';
         if (pbtn) pbtn.disabled = false;
       });
     });

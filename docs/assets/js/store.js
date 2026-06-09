@@ -27,12 +27,19 @@
       method: "POST",
       headers: { "Content-Type": "application/json; charset=utf-8" },
       body: JSON.stringify(payload)
-    })
-      .then(function (r) { return r.json(); })
-      .then(function (j) {
+    }).then(function (r) {
+      return r.text().then(function (text) {
+        if (!r.ok) {
+          var msg = "伺服器錯誤 (" + r.status + ")";
+          try { var ej = JSON.parse(text); if (ej && ej.Message) msg = ej.Message; } catch (e) {}
+          var err = new Error(msg); err.httpStatus = r.status; throw err;
+        }
+        var j;
+        try { j = JSON.parse(text); } catch (e) { throw new Error("伺服器回應格式錯誤"); }
         var raw = j && j.d != null ? j.d : j;
         return typeof raw === "string" ? JSON.parse(raw) : raw;
       });
+    });
   }
   function authPost(method, payload) { return apiPost("wsMGAUTH.asmx", method, payload); }
   function shopPost(method, payload) { return apiPost("wsMGSHOP.asmx", method, payload); }
