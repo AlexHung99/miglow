@@ -16,7 +16,7 @@
         <div class="empty-state">
           <h3>請先登入會員</h3>
           <p>登入後即可結帳，並在會員中心追蹤訂單狀態。</p>
-          <a href="login.html" class="btn btn--solid">前往登入</a>
+          <a href="login.html?redirect=checkout.html" class="btn btn--solid">前往登入</a>
         </div>`;
       return;
     }

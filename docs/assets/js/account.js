@@ -23,6 +23,11 @@
     return ok;
   }
   function notice(html) { const n = document.getElementById("authNotice"); if (n) n.innerHTML = html; }
+  /* 登入後導向：可帶 ?redirect=xxx.html 回到原頁；僅允許站內單純頁面，避免開放轉址。預設會員中心。 */
+  function postLoginDest() {
+    const r = new URLSearchParams(location.search).get("redirect") || "";
+    return /^[a-zA-Z0-9_-]+\.html$/.test(r) ? r : "member.html";
+  }
 
   /* 密碼顯示切換 */
   function initPasswordToggles() {
@@ -59,7 +64,7 @@
             return;
           }
           window.MG.session.login(res.member, res.token);
-          location.href = "member.html";
+          location.href = postLoginDest();
         })
         .catch(() => {
           notice('<div class="notice notice--err">無法連線到伺服器，請稍後再試。</div>');
@@ -96,7 +101,7 @@
             return;
           }
           window.MG.session.login(res.member, res.token);
-          location.href = "member.html";
+          location.href = postLoginDest();
         })
         .catch(() => {
           notice('<div class="notice notice--err">無法連線到伺服器，請稍後再試。</div>');
@@ -265,7 +270,7 @@
       .then((res) => {
         if (!res || !res.ok) { notice('<div class="notice notice--err">' + ((res && res.error) || "Google 登入失敗") + "</div>"); return; }
         window.MG.session.login(res.member, res.token);
-        location.href = "member.html";
+        location.href = postLoginDest();
       })
       .catch(() => { notice('<div class="notice notice--err">無法連線到伺服器，請稍後再試。</div>'); });
   }
