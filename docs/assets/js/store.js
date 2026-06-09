@@ -23,6 +23,9 @@
     return apiBase() + "/web/Service/wsMGAUTH.asmx/" + method;
   }
   function apiPost(service, method, payload) {
+    if (!apiBase()) {
+      return Promise.reject(new Error("系統設定載入失敗，請重新整理頁面後再試"));
+    }
     return fetch(apiBase() + "/web/Service/" + service + "/" + method, {
       method: "POST",
       headers: { "Content-Type": "application/json; charset=utf-8" },
