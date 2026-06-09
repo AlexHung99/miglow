@@ -142,7 +142,16 @@
         items: items
       }).then((res) => {
         if (!res || !res.ok) {
-          if (notice) notice.innerHTML = '<div class="notice notice--err" style="margin-bottom:14px">' + ((res && res.error) || "下單失敗") + "</div>";
+          const msg = (res && res.error) || "下單失敗";
+          if (notice) {
+            if (/登入/.test(msg)) {
+              // 登入逾期：清掉失效的本機登入狀態，並提供可直接前往登入的連結（登入後導回結帳）
+              window.MG.session.logout();
+              notice.innerHTML = '<div class="notice notice--err" style="margin-bottom:14px">請先<a href="login.html?redirect=checkout.html" style="color:var(--accent);text-decoration:underline;font-weight:600">登入會員</a>再結帳。</div>';
+            } else {
+              notice.innerHTML = '<div class="notice notice--err" style="margin-bottom:14px">' + msg + "</div>";
+            }
+          }
           if (btn) btn.disabled = false;
           return;
         }
