@@ -123,6 +123,11 @@
       resetPassword(token, newPassword) { return authPost("ResetPassword", { token: token, newPassword: newPassword }); }
     },
 
+    /* ---- 聯絡我們（打 wsMGAUTH.asmx/SubmitContact，寄信給站方）---- */
+    contact: {
+      submit(payload) { return authPost("SubmitContact", payload); }
+    },
+
     /* ---- 訂單（後端 wsMGSHOP，需登入 token）。皆回 Promise ---- */
     orders: {
       myOrders() { return shopPost("GetMyOrders", { token: MG.session.token() }); },

@@ -111,10 +111,29 @@
         else { el.classList.remove("is-invalid"); if (err) err.textContent = ""; }
       });
       if (!ok) { notice.innerHTML = '<div class="notice notice--err">請確認必填欄位</div>'; return; }
-      // 原型：mock 送出（未來改打 /api/contact）
-      form.reset();
-      notice.innerHTML = '<div class="notice notice--ok">已收到您的訊息，我們會盡快與您聯繫！（原型展示）</div>';
-      notice.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      const btn = form.querySelector('[type="submit"]');
+      if (btn) btn.disabled = true;
+      notice.innerHTML = '<div class="notice">送出中…</div>';
+      window.MG.contact.submit({
+        name: document.getElementById("cName").value.trim(),
+        phone: document.getElementById("cPhone").value.trim(),
+        email: document.getElementById("cEmail").value.trim(),
+        subject: (document.getElementById("cSubject") ? document.getElementById("cSubject").value : "").trim(),
+        message: document.getElementById("cMsg").value.trim()
+      }).then((res) => {
+        if (res && res.ok) {
+          form.reset();
+          notice.innerHTML = '<div class="notice notice--ok">已收到您的訊息，我們會盡快與您聯繫！</div>';
+        } else {
+          notice.innerHTML = '<div class="notice notice--err">' + ((res && res.error) || "送出失敗，請稍後再試") + "</div>";
+        }
+        if (btn) btn.disabled = false;
+        notice.scrollIntoView({ behavior: "smooth", block: "center" });
+      }).catch(() => {
+        notice.innerHTML = '<div class="notice notice--err">無法連線伺服器，請稍後再試，或改用電話／LINE 聯繫。</div>';
+        if (btn) btn.disabled = false;
+      });
     });
   }
 
