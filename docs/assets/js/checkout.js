@@ -53,7 +53,10 @@
               </div>
             </div>
             <div class="checkout-block">
-              <h3>收件資料</h3>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px">
+                <h3 style="margin:0">收件資料</h3>
+                <button type="button" id="sameAsOrderer" class="btn btn--ghost" style="padding:6px 16px;font-size:13px;line-height:1.4">同訂購人</button>
+              </div>
               <div class="form">
                 <div class="form-row">
                   ${field("rName", "收件人姓名", "text", true)}
@@ -95,6 +98,23 @@
           </aside>
         </div>
       </form>`;
+
+    const sameBtn = document.getElementById("sameAsOrderer");
+    if (sameBtn) {
+      sameBtn.addEventListener("click", () => {
+        const set = (id, v) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = v;
+          el.classList.remove("is-invalid");
+          const err = el.closest(".field") && el.closest(".field").querySelector(".field-error");
+          if (err) err.textContent = "";
+        };
+        set("rName", val("oName"));
+        set("rPhone", val("oPhone"));
+        if (window.MG.toast) window.MG.toast("已帶入訂購人資料");
+      });
+    }
 
     document.getElementById("checkoutForm").addEventListener("submit", (e) => {
       e.preventDefault();
