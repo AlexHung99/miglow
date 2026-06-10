@@ -8,6 +8,7 @@
     "description": "酸甜草莓乾與手工棉花糖交織，奶香中帶著果香，是少女心般的柔軟滋味。",
     "price": 280,
     "image_path": "assets/images/products/p-strawberry.jpg",
+    "gallery": [],
     "category": "snowflake",
     "sort_order": 1,
     "is_active": true,
@@ -22,6 +23,7 @@
     "description": "微苦可可與堅果的厚實口感，濃郁不甜膩，大人系的療癒選擇。",
     "price": 399,
     "image_path": "assets/images/products/p-chocolate.jpg",
+    "gallery": [],
     "category": "snowflake",
     "sort_order": 2,
     "is_active": true,
@@ -36,6 +38,10 @@
     "description": "最純粹的奶香與蔓越莓、堅果的平衡，經典耐吃，微光的起點滋味。",
     "price": 260,
     "image_path": "assets/images/products/p-original.jpg",
+    "gallery": [
+      "assets/images/products/p-chocolate.jpg",
+      "assets/images/products/p-strawberry.jpg"
+    ],
     "category": "snowflake",
     "sort_order": 3,
     "is_active": true,
