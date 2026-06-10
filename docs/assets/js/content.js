@@ -112,6 +112,9 @@
       });
       if (!ok) { notice.innerHTML = '<div class="notice notice--err">請確認必填欄位</div>'; return; }
 
+      const captcha = (form.querySelector('[name="cf-turnstile-response"]') || {}).value || "";
+      if (!captcha) { notice.innerHTML = '<div class="notice notice--err">請先完成「我不是機器人」驗證</div>'; return; }
+
       const btn = form.querySelector('[type="submit"]');
       if (btn) btn.disabled = true;
       notice.innerHTML = '<div class="notice">送出中…</div>';
@@ -120,8 +123,10 @@
         phone: document.getElementById("cPhone").value.trim(),
         email: document.getElementById("cEmail").value.trim(),
         subject: (document.getElementById("cSubject") ? document.getElementById("cSubject").value : "").trim(),
-        message: document.getElementById("cMsg").value.trim()
+        message: document.getElementById("cMsg").value.trim(),
+        captcha: captcha
       }).then((res) => {
+        if (window.turnstile) try { window.turnstile.reset(); } catch (e) {}
         if (res && res.ok) {
           form.reset();
           notice.innerHTML = '<div class="notice notice--ok">已收到您的訊息，我們會盡快與您聯繫！</div>';
@@ -131,6 +136,7 @@
         if (btn) btn.disabled = false;
         notice.scrollIntoView({ behavior: "smooth", block: "center" });
       }).catch(() => {
+        if (window.turnstile) try { window.turnstile.reset(); } catch (e) {}
         notice.innerHTML = '<div class="notice notice--err">無法連線伺服器，請稍後再試，或改用電話／LINE 聯繫。</div>';
         if (btn) btn.disabled = false;
       });

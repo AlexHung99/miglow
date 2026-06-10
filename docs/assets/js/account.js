@@ -90,12 +90,16 @@
       if (!agree.checked) { ok = false; notice('<div class="notice notice--err">請先同意隱私權政策與服務條款。</div>'); }
       if (!ok) return;
 
+      const captcha = (form.querySelector('[name="cf-turnstile-response"]') || {}).value || "";
+      if (!captcha) { notice('<div class="notice notice--err">請先完成「我不是機器人」驗證</div>'); return; }
+
       const btn = form.querySelector('[type="submit"]');
       if (btn) btn.disabled = true;
       notice('<div class="notice">註冊中…</div>');
-      window.MG.auth.register(val("email").trim(), val("password"), val("name").trim(), val("phone").trim())
+      window.MG.auth.register(val("email").trim(), val("password"), val("name").trim(), val("phone").trim(), captcha)
         .then((res) => {
           if (!res || !res.ok) {
+            if (window.turnstile) try { window.turnstile.reset(); } catch (e) {}
             notice('<div class="notice notice--err">' + ((res && res.error) || "註冊失敗") + "</div>");
             if (btn) btn.disabled = false;
             return;
@@ -104,6 +108,7 @@
           location.href = postLoginDest();
         })
         .catch(() => {
+          if (window.turnstile) try { window.turnstile.reset(); } catch (e) {}
           notice('<div class="notice notice--err">無法連線到伺服器，請稍後再試。</div>');
           if (btn) btn.disabled = false;
         });

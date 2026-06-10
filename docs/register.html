@@ -16,6 +16,7 @@
   <script src="assets/js/config.js" defer></script>
   <script src="assets/js/store.js" defer></script>
   <script src="assets/js/account.js" defer></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body data-page="account">
@@ -62,6 +63,7 @@
                 <input type="checkbox" id="agree">
                 <span>我已閱讀並同意<a href="#">隱私權政策</a>與<a href="#">服務條款</a></span>
               </label>
+              <div class="cf-turnstile" data-sitekey="0x4AAAAAADhuzk-5HXvkuYjr" data-theme="light" style="margin-bottom:14px"></div>
               <button class="btn btn--solid btn--block" type="submit">註冊</button>
             </form>
             <div class="auth-or"><span>或</span></div>

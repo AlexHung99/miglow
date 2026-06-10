@@ -108,8 +108,8 @@
 
     /* ---- 會員認證 API（打 Optimind wsMGAUTH.asmx）---- */
     auth: {
-      register(email, password, display_name, phone) {
-        return authPost("Register", { email: email, password: password, display_name: display_name, phone: phone });
+      register(email, password, display_name, phone, captcha) {
+        return authPost("Register", { email: email, password: password, display_name: display_name, phone: phone, captcha: captcha || "" });
       },
       login(email, password) {
         return authPost("Login", { email: email, password: password });
