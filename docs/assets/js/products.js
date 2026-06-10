@@ -74,7 +74,7 @@
     const bc = document.getElementById("bcName"); if (bc) bc.textContent = p.name_zh;
 
     // 圖庫：主圖 + 品牌情境圖（原型；未來由 b_miglow_product_image 提供多圖）
-    const gallery = [p.image_path, "assets/images/brand/hero.png"];
+    const gallery = [p.image_path, "assets/images/brand/hero.jpg"];
 
     wrap.innerHTML = `
       <div class="product-detail">

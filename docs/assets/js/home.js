@@ -27,7 +27,7 @@
                 <p class="hero__subtitle">${b.subtitle}</p>
                 <a href="${b.link_url}" class="btn btn--solid">${b.link_label || "看更多"}</a>
               </div>
-              <div class="hero__media"><img src="${b.image_path}" alt="${b.title}" loading="${i === 0 ? "eager" : "lazy"}"></div>
+              <div class="hero__media"><img src="${b.image_path}" alt="${b.title}" loading="${i === 0 ? "eager" : "lazy"}" fetchpriority="${i === 0 ? "high" : "auto"}" decoding="async"></div>
             </div>
           </div>
         </div>`
@@ -128,10 +128,10 @@
     const grid = document.getElementById("igGrid");
     if (!grid) return;
     const imgs = [
-      "assets/images/brand/hero.png",
-      "assets/images/products/p-strawberry.png",
-      "assets/images/products/p-chocolate.png",
-      "assets/images/products/p-original.png"
+      "assets/images/brand/hero.jpg",
+      "assets/images/products/p-strawberry.jpg",
+      "assets/images/products/p-chocolate.jpg",
+      "assets/images/products/p-original.jpg"
     ];
     const link = (D.site && D.site.social && D.site.social.instagram) || "#";
     grid.innerHTML = imgs
