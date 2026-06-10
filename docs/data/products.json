@@ -38,10 +38,7 @@
     "description": "最純粹的奶香與蔓越莓、堅果的平衡，經典耐吃，微光的起點滋味。",
     "price": 260,
     "image_path": "assets/images/products/p-original.jpg",
-    "gallery": [
-      "assets/images/products/p-chocolate.jpg",
-      "assets/images/products/p-strawberry.jpg"
-    ],
+    "gallery": [],
     "category": "snowflake",
     "sort_order": 3,
     "is_active": true,
