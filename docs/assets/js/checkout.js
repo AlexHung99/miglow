@@ -37,6 +37,8 @@
     const shipping = window.MG.shipping(subtotal);
     const total = subtotal + shipping;
     const me = window.MG.session.get() || {};
+    const gaItems = items.map((it) => ({ item_id: it.product_uid, item_name: it.name_zh, price: Number(it.price || 0), quantity: it.qty }));
+    window.MG.track("begin_checkout", { currency: "TWD", value: total, items: gaItems });
 
     root.innerHTML = `
       <form id="checkoutForm" novalidate>
@@ -155,6 +157,7 @@
           if (btn) btn.disabled = false;
           return;
         }
+        window.MG.track("purchase", { transaction_id: res.order_no, currency: "TWD", value: total, shipping: shipping, items: gaItems });
         window.MG.cart.clear();
         location.href = "order-complete.html?no=" + encodeURIComponent(res.order_no);
       }).catch((err) => {

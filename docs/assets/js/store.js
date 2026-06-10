@@ -66,6 +66,10 @@
     payment() { return (D.site && D.site.payment) || {}; },
 
     /* ---- 購物車 ---- */
+    /* ---- GA4 事件埋點（安全包裝，未載入 gtag 時靜默）---- */
+    track(name, params) { try { if (window.gtag) window.gtag("event", name, params || {}); } catch (e) {} },
+    gaItem(p, qty) { return { item_id: p.product_uid || p.slug, item_name: p.name_zh, price: Number(p.price || 0), quantity: qty || 1 }; },
+
     cart: {
       get() { return read(KEY_CART, []); },
       save(items) { write(KEY_CART, items); if (window.MIGLOW_updateCartBadge) window.MIGLOW_updateCartBadge(); },
@@ -78,6 +82,7 @@
         if (line) line.qty += qty || 1;
         else cart.push({ product_uid: uid, slug: p.slug, name_zh: p.name_zh, price: p.price, image_path: p.image_path, qty: qty || 1 });
         MG.cart.save(cart);
+        MG.track("add_to_cart", { currency: "TWD", value: Number(p.price || 0) * (qty || 1), items: [MG.gaItem(p, qty || 1)] });
       },
       setQty(uid, qty) {
         const cart = MG.cart.get();
