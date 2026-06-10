@@ -73,8 +73,9 @@
     document.title = `${p.name_zh}｜微光 MI GLOW`;
     const bc = document.getElementById("bcName"); if (bc) bc.textContent = p.name_zh;
 
-    // 圖庫：主圖 + 品牌情境圖（原型；未來由 b_miglow_product_image 提供多圖）
-    const gallery = [p.image_path, "assets/images/brand/hero.jpg"];
+    // 圖庫：主圖 + 後台「相簿」多張照片（去重；無相簿時僅主圖）
+    const gallery = [p.image_path].concat(Array.isArray(p.gallery) ? p.gallery : [])
+      .filter((v, i, a) => v && a.indexOf(v) === i);
 
     wrap.innerHTML = `
       <div class="product-detail">
