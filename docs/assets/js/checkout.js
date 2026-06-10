@@ -206,6 +206,17 @@
           </dl>
         </div>
 
+        ${order.tracking_no ? `
+        <div class="bank-card">
+          <h3>物流資訊</h3>
+          <dl>
+            <div class="bank-line"><dt>目前狀態</dt><dd>${window.MG.ORDER_STATUS[order.order_status] || order.order_status}</dd></div>
+            ${order.shipping_carrier ? `<div class="bank-line"><dt>物流商</dt><dd>${order.shipping_carrier}</dd></div>` : ""}
+            <div class="bank-line"><dt>物流單號</dt><dd>${order.tracking_no}<button class="copy-btn" type="button" data-copy="${order.tracking_no}">複製</button></dd></div>
+            ${order.shipped_at ? `<div class="bank-line"><dt>出貨日</dt><dd>${order.shipped_at}</dd></div>` : ""}
+          </dl>
+        </div>` : ""}
+
         <div id="payArea"></div>
       </div>`;
 
