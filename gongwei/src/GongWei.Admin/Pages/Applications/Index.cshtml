@@ -1,0 +1,72 @@
+@page
+@model GongWei.Admin.Pages.Applications.IndexModel
+@{
+    ViewData["Title"] = "建角審核";
+}
+
+<h1>建角審核佇列</h1>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty">目前沒有待審的建角申請。</div>
+}
+else
+{
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>玩家</th>
+                    <th>角色名</th>
+                    <th>身分</th>
+                    <th>送審時間</th>
+                    <th>上傳圖片</th>
+                    <th>狀態</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.PlayerName</td>
+                    <td>@item.CharacterName</td>
+                    <td><span class="badge">@item.Role</span></td>
+                    <td>@(item.SubmittedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))</td>
+                    <td>
+                        @if (item.PortraitStatus is null)
+                        {
+                            <span class="badge">官方立繪</span>
+                        }
+                        else
+                        {
+                            <span class="badge">@item.PortraitStatus</span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.ClaimedBy is null)
+                        {
+                            <span>未認領</span>
+                        }
+                        else
+                        {
+                            <span class="badge">已認領</span>
+                        }
+                    </td>
+                    <td>
+                        <a class="button" asp-page="/Applications/Review" asp-route-id="@item.Id">審核</a>
+                        @if (item.ClaimedBy is null)
+                        {
+                            <form method="post" asp-page-handler="Claim" style="display:inline">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="hidden" name="version" value="@item.Version" />
+                                <button type="submit" class="secondary">認領</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

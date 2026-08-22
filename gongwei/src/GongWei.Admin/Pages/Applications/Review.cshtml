@@ -1,0 +1,84 @@
+@page "{id:guid}"
+@model GongWei.Admin.Pages.Applications.ReviewModel
+@{
+    ViewData["Title"] = "審核建角申請";
+    var app = Model.Application!;
+}
+
+<h1>審核建角申請</h1>
+
+<div class="table-wrap">
+    <table>
+        <tbody>
+            <tr><th>玩家</th><td>@app.PlayerName</td></tr>
+            <tr><th>角色名</th><td>@app.FamilyName @app.CharacterName</td></tr>
+            <tr><th>身分</th><td><span class="badge">@app.RoleLabel</span></td></tr>
+            <tr>
+                <th>立繪</th>
+                <td>
+                    @if (app.PortraitUrl is not null)
+                    {
+                        <div>@app.PortraitUrl</div>
+                    }
+                    @if (app.PortraitReviewStatus is not null)
+                    {
+                        <span class="badge">上傳圖片：@app.PortraitReviewStatus</span>
+                    }
+                    else
+                    {
+                        <span class="badge">官方立繪</span>
+                    }
+                </td>
+            </tr>
+            <tr><th>外貌</th><td>@app.Appearance</td></tr>
+            <tr><th>性格</th><td>@app.Personality</td></tr>
+            <tr><th>背景</th><td><div style="white-space:pre-wrap">@app.Biography</div></td></tr>
+        </tbody>
+    </table>
+</div>
+
+@if (app.PortraitReviewStatus is not null and not "approved")
+{
+    <div class="flash flash-error">
+        此申請引用的上傳圖片尚未通過審核，核准會被拒絕。請先於「圖片審核」處理。
+    </div>
+}
+
+<h2>核定</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="Version" />
+
+    <label asp-for="RankId">位階</label>
+    <select asp-for="RankId" asp-items="@Model.Ranks">
+        <option value="">（暫不授位）</option>
+    </select>
+
+    <label asp-for="ResidenceId">居所</label>
+    <select asp-for="ResidenceId" asp-items="@Model.Residences">
+        <option value="">（暫不分宮）</option>
+    </select>
+
+    <h2>初始能力（總點數上限 @Model.AbilityBudget）</h2>
+
+    <label asp-for="Charm">姿容</label>
+    <input asp-for="Charm" type="number" min="0" max="100" />
+
+    <label asp-for="Intellect">才智</label>
+    <input asp-for="Intellect" type="number" min="0" max="100" />
+
+    <label asp-for="Artistry">技藝</label>
+    <input asp-for="Artistry" type="number" min="0" max="100" />
+
+    <label asp-for="Stamina">體魄</label>
+    <input asp-for="Stamina" type="number" min="0" max="100" />
+
+    <label asp-for="Note">審核備註（退回與駁回為必填）</label>
+    <textarea asp-for="Note" rows="3"></textarea>
+
+    <p style="margin-top:1rem; display:flex; gap:0.5rem;">
+        <button type="submit" asp-page-handler="Approve" asp-route-id="@app.Id">核准並建立角色</button>
+        <button type="submit" class="secondary" asp-page-handler="RequestRevision" asp-route-id="@app.Id">退回補件</button>
+        <button type="submit" class="secondary" asp-page-handler="Reject" asp-route-id="@app.Id">駁回</button>
+    </p>
+</form>

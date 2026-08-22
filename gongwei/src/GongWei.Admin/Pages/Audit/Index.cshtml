@@ -1,0 +1,65 @@
+@page
+@model GongWei.Admin.Pages.Audit.IndexModel
+@{
+    ViewData["Title"] = "稽核紀錄";
+}
+
+<h1>稽核紀錄</h1>
+
+<p style="color:var(--muted)">
+    稽核表為 append-only，資料庫層以 trigger 阻擋 UPDATE / DELETE，此頁僅供查閱。
+</p>
+
+<form method="get" style="max-width:420px">
+    <label asp-for="ActionFilter">動作前綴（例：character_application.）</label>
+    <div style="display:flex; gap:0.5rem;">
+        <input asp-for="ActionFilter" />
+        <button type="submit">查詢</button>
+    </div>
+</form>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty">沒有符合條件的紀錄。</div>
+}
+else
+{
+    <div class="table-wrap" style="margin-top:1rem">
+        <table>
+            <thead>
+                <tr>
+                    <th>時間</th>
+                    <th>操作者</th>
+                    <th>角色</th>
+                    <th>動作</th>
+                    <th>目標</th>
+                    <th>原因</th>
+                    <th>Request</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.OccurredAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@(item.ActorName ?? "system")</td>
+                    <td><small>@item.ActorRole</small></td>
+                    <td><span class="badge">@item.Action</span></td>
+                    <td>@item.TargetType<br /><small>@item.TargetId</small></td>
+                    <td>@item.Reason</td>
+                    <td><small>@item.RequestId</small></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.NextCursor is { } cursor)
+    {
+        <p style="margin-top:1rem">
+            <a class="button" asp-page="/Audit/Index"
+               asp-route-ActionFilter="@Model.ActionFilter"
+               asp-route-BeforeId="@cursor">載入更早的紀錄</a>
+        </p>
+    }
+}

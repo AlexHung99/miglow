@@ -1,0 +1,77 @@
+@page
+@model GongWei.Admin.Pages.Approvals.IndexModel
+@{
+    ViewData["Title"] = "雙人覆核";
+}
+
+<h1>雙人覆核</h1>
+
+<p style="color:var(--muted)">
+    申請人不得覆核自己提出的案件；核可後仍會在執行時重新比對目標版本，避免核准的是舊狀態。
+</p>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty">目前沒有待覆核的案件。</div>
+}
+else
+{
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>類型</th>
+                    <th>狀態</th>
+                    <th>原因</th>
+                    <th>目標</th>
+                    <th>申請人</th>
+                    <th>到期</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td><span class="badge">@item.Handler</span></td>
+                    <td>@item.Status</td>
+                    <td>@item.Reason</td>
+                    <td>@item.TargetType<br /><small>@item.TargetId</small></td>
+                    <td>@item.RequestedByName</td>
+                    <td>@item.ExpiresAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>
+                        @if (item.IsExpired)
+                        {
+                            <span class="badge">已逾期</span>
+                        }
+                        else if (item.RequestedByMe && item.Status == "pending")
+                        {
+                            <span class="badge">本人申請，不可自審</span>
+                        }
+                        else if (item.Status == "pending")
+                        {
+                            <form method="post" asp-page-handler="Decide">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="hidden" name="version" value="@item.Version" />
+                                <input type="text" name="note" placeholder="意見（否決必填）" />
+                                <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                                    <button type="submit" name="approve" value="true">核可</button>
+                                    <button type="submit" name="approve" value="false" class="secondary">否決</button>
+                                </div>
+                            </form>
+                        }
+                        else if (item.Status == "approved")
+                        {
+                            <form method="post" asp-page-handler="Execute">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="hidden" name="version" value="@item.Version" />
+                                <button type="submit">執行</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

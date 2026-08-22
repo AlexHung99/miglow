@@ -1,0 +1,21 @@
+@page
+@model GongWei.Admin.Pages.Account.SignInModel
+@{
+    ViewData["Title"] = "登入";
+}
+
+<h1>管理後台登入</h1>
+
+@if (Model.ErrorMessage is not null)
+{
+    <div class="flash flash-error">@Model.ErrorMessage</div>
+}
+
+<p style="color:var(--muted)">
+    以 LINE 帳號登入。僅具備管理權限的帳號可進入，權限每次登入時由資料庫重新讀取。
+</p>
+
+@if (Model.AuthorizeUrl is not null)
+{
+    <p><a class="button" href="@Model.AuthorizeUrl">以 LINE 登入</a></p>
+}

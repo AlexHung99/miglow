@@ -1,0 +1,56 @@
+<Project>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    <!-- EF Core and the Npgsql provider must move together; Npgsql 10.0.3 requires EF >= 10.0.4. -->
+    <EfCoreVersion>10.0.11</EfCoreVersion>
+    <!-- 10.0.11 minimum: Microsoft.AspNetCore.DataProtection 10.0.4 carries a critical
+         advisory (GHSA-9mv3-2cwr-p262), and that package seals the LINE login payload. -->
+    <AspNetVersion>10.0.11</AspNetVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Persistence -->
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="$(EfCoreVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="$(EfCoreVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="$(EfCoreVersion)" />
+
+    <!-- Hosting / DI / config -->
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="$(AspNetVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="$(AspNetVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="$(AspNetVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="$(AspNetVersion)" />
+
+    <!-- Data Protection: the LINE login attempt payload must survive an app-pool recycle,
+         so the key ring is persisted rather than held in memory (line_login_v1.1 §8.4). -->
+    <PackageVersion Include="Microsoft.AspNetCore.DataProtection" Version="$(AspNetVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.DataProtection.Extensions" Version="$(AspNetVersion)" />
+
+    <!-- API -->
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="$(AspNetVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="$(EfCoreVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="$(AspNetVersion)" />
+
+    <!-- Media processing -->
+    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
+
+    <!-- Diagnostics -->
+    <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
+
+    <!-- Tests -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageVersion Include="FluentAssertions" Version="7.2.0" />
+    <PackageVersion Include="Xunit.SkippableFact" Version="1.5.23" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(AspNetVersion)" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.6.0" />
+  </ItemGroup>
+
+</Project>

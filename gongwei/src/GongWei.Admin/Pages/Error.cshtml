@@ -1,0 +1,13 @@
+@page
+@model GongWei.Admin.Pages.ErrorModel
+@{
+    ViewData["Title"] = "發生錯誤";
+}
+
+<h1>發生錯誤</h1>
+
+<p>系統遇到未預期的問題，操作未完成。請回報下列識別碼以便查詢伺服器紀錄。</p>
+
+<p><code>@Model.RequestId</code></p>
+
+<p><a class="button" asp-page="/Index">回到總覽</a></p>

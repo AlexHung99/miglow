@@ -1,0 +1,54 @@
+@page
+@model GongWei.Admin.Pages.Portraits.IndexModel
+@{
+    ViewData["Title"] = "圖片審核";
+}
+
+<h1>人物圖片審核</h1>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty">目前沒有待審的人物圖片。</div>
+}
+else
+{
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>玩家</th>
+                    <th>身分</th>
+                    <th>尺寸</th>
+                    <th>檔案大小</th>
+                    <th>送審時間</th>
+                    <th>已被申請引用</th>
+                    <th>決定</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.PlayerName</td>
+                    <td><span class="badge">@item.Role</span></td>
+                    <td>@item.WidthPx × @item.HeightPx</td>
+                    <td>@(item.ByteSize / 1024) KB</td>
+                    <td>@item.SubmittedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@(item.IsReferencedByApplication ? "是" : "否")</td>
+                    <td>
+                        <form method="post" asp-page-handler="Review">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="version" value="@item.Version" />
+                            <input type="text" name="note" placeholder="駁回原因（駁回必填）" />
+                            <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                                <button type="submit" name="approve" value="true">通過</button>
+                                <button type="submit" name="approve" value="false" class="secondary">駁回</button>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

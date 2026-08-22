@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Pure domain: no EF, no ASP.NET, no infrastructure references (spec §3). -->
+</Project>

@@ -1,0 +1,51 @@
+@using GongWei.Admin.Security
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="same-origin" />
+    <title>@ViewData["Title"] — 宮闈浮生 管理後台</title>
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" asp-page="/Index">宮闈浮生 · 管理後台</a>
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <nav class="nav">
+                <a asp-page="/Index">總覽</a>
+                <a asp-page="/Applications/Index">建角審核</a>
+                <a asp-page="/Portraits/Index">圖片審核</a>
+                <a asp-page="/Approvals/Index">雙人覆核</a>
+                <a asp-page="/Audit/Index">稽核紀錄</a>
+            </nav>
+
+            <form method="post" asp-page="/Account/SignOut" class="signout">
+                <span class="who">@User.Identity!.Name</span>
+                <button type="submit">登出</button>
+            </form>
+        }
+    </header>
+
+    <main class="content">
+        @if (TempData["Success"] is string success)
+        {
+            <div class="flash flash-success">@success</div>
+        }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="flash flash-error">@error</div>
+        }
+
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        後端規格書 v0.8 · 所有管理操作皆留存稽核紀錄
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

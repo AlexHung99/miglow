@@ -1,0 +1,19 @@
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+artifacts/
+publish/
+TestResults/
+
+# Never commit secrets, connection strings or key rings (spec §2.3, §11)
+appsettings.Production.json
+appsettings.Local.json
+*.secrets.json
+secrets/
+keyring/
+media/
+*.pfx
+*.key
