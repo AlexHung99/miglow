@@ -14,12 +14,16 @@
 
         @if (User.Identity?.IsAuthenticated == true)
         {
+            @* Only pages that exist. asp-page pointing at a quarantined page throws while
+               rendering the layout, which would take down every screen including this one.
+               The unbuilt modules are shown as disabled so the nav still describes the
+               finished shape of the back office. *@
             <nav class="nav">
                 <a asp-page="/Index">總覽</a>
-                <a asp-page="/Applications/Index">建角審核</a>
-                <a asp-page="/Portraits/Index">圖片審核</a>
-                <a asp-page="/Approvals/Index">雙人覆核</a>
                 <a asp-page="/Audit/Index">稽核紀錄</a>
+                <span class="nav__pending" title="尚未依 v1.1 重寫（任務 #15）">建角審核</span>
+                <span class="nav__pending" title="尚未依 v1.1 重寫（任務 #15）">圖片審核</span>
+                <span class="nav__pending" title="尚未依 v1.1 重寫（任務 #15）">雙人覆核</span>
             </nav>
 
             <form method="post" asp-page="/Account/SignOut" class="signout">
@@ -43,7 +47,7 @@
     </main>
 
     <footer class="footer">
-        後端規格書 v0.8 · 所有管理操作皆留存稽核紀錄
+        後端規格書 v1.1 · 所有管理操作皆留存稽核紀錄
     </footer>
 
     @await RenderSectionAsync("Scripts", required: false)

@@ -220,3 +220,44 @@ public class PlayerPortraitSubmissionConfiguration : IEntityTypeConfiguration<Pl
             .HasFilter("status = 'pending'");
     }
 }
+
+/// <summary>
+/// Table: admin_credentials. Not present in schema_v1.1.sql — added by the
+/// LocalAdminCredentials migration, which is the only table in this database that has no
+/// counterpart in the authoritative file.
+/// </summary>
+public class AdminCredentialConfiguration : IEntityTypeConfiguration<AdminCredential>
+{
+    public void Configure(EntityTypeBuilder<AdminCredential> b)
+    {
+        b.ToTable("admin_credentials", t =>
+        {
+            t.HasCheckConstraint("ck_admin_credentials_username",
+                "char_length(btrim(username)) BETWEEN 3 AND 64");
+            t.HasCheckConstraint("ck_admin_credentials_failed", "failed_attempts >= 0");
+            t.HasCheckConstraint("ck_admin_credentials_version", "version > 0");
+        });
+
+        // One credential per user, enforced by making the user the key rather than by a
+        // unique index on a separate id.
+        b.HasKey(x => x.UserId);
+
+        b.Property(x => x.UserId).ValueGeneratedNever();
+        b.Property(x => x.Username).HasMaxLength(64).IsRequired();
+        b.Property(x => x.PasswordHash).HasMaxLength(255).IsRequired();
+        b.Property(x => x.MustChangePassword).HasDefaultValue(false);
+        b.Property(x => x.FailedAttempts).HasDefaultValue(0);
+        b.Property(x => x.PasswordChangedAt).CreatedNow();
+        b.Property(x => x.CreatedAt).CreatedNow();
+        b.DatabaseManagedVersion();
+
+        b.HasOne(x => x.User).WithMany()
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // The unique index is created by the migration as lower(username), which EF has no
+        // way to express here. Declaring a plain unique index as well would produce a
+        // second, weaker constraint and a spurious model difference on every scaffold.
+        b.HasIndex(x => x.Username).HasDatabaseName("ix_admin_credentials_username");
+    }
+}

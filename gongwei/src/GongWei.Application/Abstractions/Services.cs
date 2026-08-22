@@ -155,6 +155,26 @@ public interface IPayloadProtector
     string? Unprotect(string purpose, byte[] sealedPayload);
 }
 
+public enum PasswordVerification
+{
+    Failed,
+    Succeeded,
+
+    /// <summary>Correct, but hashed with weaker parameters than the current default.</summary>
+    SucceededNeedsRehash
+}
+
+/// <summary>
+/// Password hashing for the local admin credential. Deliberately narrow: this is the only
+/// password in the system and nothing else should acquire one.
+/// </summary>
+public interface IPasswordHasher
+{
+    string Hash(string password);
+
+    PasswordVerification Verify(string password, string encoded);
+}
+
 /// <summary>A session that has just been created. The raw token exists only here.</summary>
 public sealed record IssuedSessionToken(
     Guid SessionId,

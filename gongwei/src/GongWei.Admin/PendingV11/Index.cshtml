@@ -1,0 +1,68 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "總覽";
+}
+
+<h1>總覽</h1>
+
+<h2>待處理</h2>
+<div class="cards">
+    <div class="card">
+        <div class="value">@Model.PendingApplications</div>
+        <div class="label"><a asp-page="/Applications/Index">建角申請待審</a></div>
+    </div>
+    <div class="card">
+        <div class="value">@Model.PendingPortraits</div>
+        <div class="label"><a asp-page="/Portraits/Index">人物圖片待審</a></div>
+    </div>
+    <div class="card">
+        <div class="value">@Model.PendingAudiences</div>
+        <div class="label">侍奉申請待裁</div>
+    </div>
+    <div class="card">
+        <div class="value">@Model.PendingApprovals</div>
+        <div class="label"><a asp-page="/Approvals/Index">雙人覆核待決</a></div>
+    </div>
+    <div class="card">
+        <div class="value">@Model.DuePregnancies</div>
+        <div class="label">臨盆待抽取</div>
+    </div>
+</div>
+
+<h2>宮廷現況</h2>
+<div class="cards">
+    <div class="card">
+        <div class="value">@Model.ActiveCharacters</div>
+        <div class="label">在世角色</div>
+    </div>
+    <div class="card">
+        <div class="value">@Model.WaitingHeirs</div>
+        <div class="label">待生池人數</div>
+    </div>
+    <div class="card">
+        <div class="value">@Model.OpenEvents</div>
+        <div class="label">開放中的事件</div>
+    </div>
+</div>
+
+@if (Model.DeadOutboxMessages > 0 || Model.FailingJobs > 0)
+{
+    <h2>系統告警</h2>
+    <div class="cards">
+        @if (Model.DeadOutboxMessages > 0)
+        {
+            <div class="card">
+                <div class="value">@Model.DeadOutboxMessages</div>
+                <div class="label">Outbox 已放棄重試，需人工處理</div>
+            </div>
+        }
+        @if (Model.FailingJobs > 0)
+        {
+            <div class="card">
+                <div class="value">@Model.FailingJobs</div>
+                <div class="label">連續失敗的排程工作</div>
+            </div>
+        }
+    </div>
+}

@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using GongWei.Admin.Security;
 using GongWei.Application.Abstractions;
 using GongWei.Domain.Common;
+using GongWei.Domain.Identity;
 using GongWei.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -13,105 +15,167 @@ using Microsoft.EntityFrameworkCore;
 namespace GongWei.Admin.Pages.Account;
 
 /// <summary>
-/// Admin sign-in. Identity still comes from LINE Login, but the admin cookie is only
-/// issued to an account that currently holds at least one admin role in the database —
-/// roles are never carried over from the player session (spec §2.3).
+/// Local username and password sign-in for the control back office.
+///
+/// A departure from backend_spec_v1.1 §155, where admin identity also arrives through
+/// LINE Login. Three things keep the extra door narrow: the account is locked for fifteen
+/// minutes after five failures, every attempt is audited whether it succeeds or not, and
+/// the same message comes back for a wrong username, a wrong password and a locked
+/// account — so this page cannot be used to discover which admin accounts exist.
 /// </summary>
 [AllowAnonymous]
-public sealed class SignInModel(
+public class SignInModel(
     GongWeiDbContext db,
-    ILineLoginClient line,
-    IRandomProvider random,
+    IPasswordHasher passwords,
     IClock clock,
-    IAuditWriter audit) : PageModel
+    IAuditWriter audit,
+    ILogger<SignInModel> logger) : PageModel
 {
-    private const string StateCookie = "gw_admin_oauth_state";
-    private const string VerifierCookie = "gw_admin_oauth_verifier";
+    [BindProperty]
+    [Required(ErrorMessage = "請輸入帳號。")]
+    public string Username { get; set; } = string.Empty;
 
-    public string? AuthorizeUrl { get; private set; }
+    [BindProperty]
+    [Required(ErrorMessage = "請輸入密碼。")]
+    [DataType(DataType.Password)]
+    public string Password { get; set; } = string.Empty;
 
     public string? ErrorMessage { get; private set; }
 
-    public void OnGet(string? error)
+    public void OnGet()
     {
-        ErrorMessage = error;
-
-        var state = random.NextUrlSafeToken(24);
-        var nonce = random.NextUrlSafeToken(16);
-        var verifier = random.NextUrlSafeToken(48);
-
-        var challenge = Convert.ToBase64String(
-                System.Security.Cryptography.SHA256.HashData(
-                    System.Text.Encoding.ASCII.GetBytes(verifier)))
-            .Replace('+', '-')
-            .Replace('/', '_')
-            .TrimEnd('=');
-
-        var options = new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Lax,
-            Expires = clock.UtcNow.AddMinutes(10),
-            Path = "/Account"
-        };
-
-        Response.Cookies.Append(StateCookie, state, options);
-        Response.Cookies.Append(VerifierCookie, verifier, options);
-
-        AuthorizeUrl = line.BuildAuthorizeUrl(state, nonce, challenge);
     }
 
-    public async Task<IActionResult> OnGetCallbackAsync(string code, string state, CancellationToken ct)
+    public async Task<IActionResult> OnPostAsync(string? returnUrl, CancellationToken ct)
     {
-        var expectedState = Request.Cookies[StateCookie];
-        var verifier = Request.Cookies[VerifierCookie];
-
-        if (string.IsNullOrEmpty(expectedState) || string.IsNullOrEmpty(verifier) || expectedState != state)
+        if (!ModelState.IsValid)
         {
-            return RedirectToPage("/Account/SignIn", new { error = "登入驗證失敗，請重新開始。" });
+            return Page();
         }
 
-        Response.Cookies.Delete(StateCookie);
-        Response.Cookies.Delete(VerifierCookie);
+        var now = clock.UtcNow;
+        var username = Username.Trim();
 
-        var profile = await line.ExchangeCodeAsync(code, verifier, ct);
+        var credential = await db.AdminCredentials
+            .Include(c => c.User)
+            .FirstOrDefaultAsync(c => c.Username.ToLower() == username.ToLower(), ct);
 
-        var user = await db.Users.FirstOrDefaultAsync(u => u.LineUserId == profile.LineUserId, ct);
-
-        if (user is null || !user.CanSignIn(clock.UtcNow))
+        if (credential is null)
         {
-            return RedirectToPage("/Account/SignIn", new { error = "此帳號無法登入管理後台。" });
+            // Hash anyway. Returning immediately would make a missing account measurably
+            // faster than a wrong password, which is enough to enumerate admins.
+            passwords.Verify(Password, DummyHash);
+
+            return await FailAsync(null, "unknown_username", ct);
+        }
+
+        if (credential.IsLockedAt(now))
+        {
+            return await FailAsync(credential, "locked", ct);
+        }
+
+        if (credential.User is null || credential.User.Status != UserStatus.Active)
+        {
+            return await FailAsync(credential, "account_inactive", ct);
+        }
+
+        var verification = passwords.Verify(Password, credential.PasswordHash);
+
+        if (verification == PasswordVerification.Failed)
+        {
+            credential.RegisterFailure(now);
+            return await FailAsync(credential, "bad_password", ct);
+        }
+
+        // Correct, but hashed with parameters weaker than today's default. Re-hash now,
+        // while the plaintext is in hand — there is no other moment when it can be done.
+        if (verification == PasswordVerification.SucceededNeedsRehash)
+        {
+            credential.PasswordHash = passwords.Hash(Password);
+            credential.PasswordChangedAt = now;
+            logger.LogInformation("Upgraded the password hash parameters for an admin account.");
         }
 
         var roles = await db.AdminRoleAssignments
-            .Where(a => a.UserId == user.Id && a.RevokedAt == null)
+            .Where(a => a.UserId == credential.UserId && (a.ExpiresAt == null || a.ExpiresAt > now))
             .Select(a => a.Role)
             .ToListAsync(ct);
 
         if (roles.Count == 0)
         {
-            return RedirectToPage("/Account/SignIn", new { error = "此帳號沒有任何管理權限。" });
+            // Credentials are not authority. An account whose roles have all lapsed gets
+            // no cookie, because the fallback policy would otherwise let it reach pages
+            // that only check "is authenticated".
+            return await FailAsync(credential, "no_admin_role", ct);
         }
 
+        credential.RegisterSuccess(now);
+        credential.User.LastLoginAt = now;
+        credential.User.LastSeenAt = now;
+
+        audit.Write(
+            action: "admin.local_login",
+            targetType: "user",
+            targetId: credential.UserId,
+            after: new { result = "success", username = credential.Username });
+
+        await db.SaveChangesAsync(ct);
+
         var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
-        identity.AddClaim(new Claim(AdminClaims.UserId, user.Id.ToString()));
-        identity.AddClaim(new Claim(ClaimTypes.Name, user.DisplayName));
+        identity.AddClaim(new Claim(AdminClaims.UserId, credential.UserId.ToString()));
+        identity.AddClaim(new Claim(ClaimTypes.Name, credential.User.DisplayName));
 
         foreach (var role in roles)
         {
-            identity.AddClaim(new Claim(AdminClaims.AdminRole, role.ToString()));
+            identity.AddClaim(new Claim(AdminClaims.AdminRole, EnumNaming.ToDbValue(role)));
         }
 
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
-            new ClaimsPrincipal(identity),
-            new AuthenticationProperties { IsPersistent = false });
+            new ClaimsPrincipal(identity));
 
-        audit.Write("admin.sign_in", "user", user.Id,
-            after: new { roles = roles.Select(EnumNaming.ToDbValue) });
+        logger.LogInformation("Admin signed in locally.");
+
+        return LocalRedirect(SafeReturnUrl(returnUrl));
+    }
+
+    /// <summary>
+    /// One message for every failure. Distinguishing "no such account" from "wrong
+    /// password" would turn this form into a way to enumerate admin usernames, and
+    /// naming the lockout would tell an attacker their guessing is working.
+    /// </summary>
+    private async Task<IActionResult> FailAsync(
+        AdminCredential? credential,
+        string reason,
+        CancellationToken ct)
+    {
+        // The reason is recorded for the operator, never shown to the caller.
+        audit.Write(
+            action: "admin.local_login.failed",
+            targetType: credential is null ? null : "user",
+            targetId: credential?.UserId,
+            after: new { result = "failed", reason },
+            reason: reason);
+
         await db.SaveChangesAsync(ct);
 
-        return RedirectToPage("/Index");
+        logger.LogWarning("Local admin sign-in failed: {Reason}", reason);
+
+        ErrorMessage = "帳號或密碼不正確。";
+        return Page();
     }
+
+    /// <summary>
+    /// Only same-site paths. <see cref="Url.IsLocalUrl"/> rejects absolute URLs and
+    /// protocol-relative ones, which is what stops this being an open redirect.
+    /// </summary>
+    private string SafeReturnUrl(string? returnUrl) =>
+        !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl) ? returnUrl : "/";
+
+    /// <summary>
+    /// A structurally valid hash of a value nobody knows, used to spend the same time on
+    /// an unknown username as on a wrong password.
+    /// </summary>
+    private const string DummyHash =
+        "pbkdf2-sha256$600000$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
 }

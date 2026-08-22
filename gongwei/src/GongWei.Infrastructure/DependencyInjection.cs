@@ -85,6 +85,7 @@ public static class DependencyInjection
             client.Timeout = TimeSpan.FromSeconds(10));
 
         services.AddScoped<ILineLoginAttemptStore, LineLoginAttemptStore>();
+        services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
         services.AddSingleton<IPayloadProtector, DataProtectionPayloadProtector>();
 
         return services.AddGongWeiUseCases();

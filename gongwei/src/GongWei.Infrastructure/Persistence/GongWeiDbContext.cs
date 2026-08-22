@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using GongWei.Domain.Characters;
 using GongWei.Domain.Common;
 using GongWei.Domain.Economy;
@@ -32,6 +32,8 @@ public class GongWeiDbContext(DbContextOptions<GongWeiDbContext> options)
     public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
     public DbSet<PlayerPortraitSubmission> PlayerPortraitSubmissions => Set<PlayerPortraitSubmission>();
     public DbSet<LineLoginAttempt> LineLoginAttempts => Set<LineLoginAttempt>();
+
+    public DbSet<AdminCredential> AdminCredentials => Set<AdminCredential>();
     public DbSet<Rank> Ranks => Set<Rank>();
     public DbSet<CharacterTitleDefinition> CharacterTitleDefinitions => Set<CharacterTitleDefinition>();
     public DbSet<Residence> Residences => Set<Residence>();

@@ -1,68 +1,50 @@
 @page
-@model IndexModel
+@model GongWei.Admin.Pages.IndexModel
 @{
-    ViewData["Title"] = "總覽";
+    ViewData["Title"] = "內務府";
 }
 
-<h1>總覽</h1>
+<h1>內務府</h1>
 
-<h2>待處理</h2>
-<div class="cards">
-    <div class="card">
-        <div class="value">@Model.PendingApplications</div>
-        <div class="label"><a asp-page="/Applications/Index">建角申請待審</a></div>
-    </div>
-    <div class="card">
-        <div class="value">@Model.PendingPortraits</div>
-        <div class="label"><a asp-page="/Portraits/Index">人物圖片待審</a></div>
-    </div>
-    <div class="card">
-        <div class="value">@Model.PendingAudiences</div>
-        <div class="label">侍奉申請待裁</div>
-    </div>
-    <div class="card">
-        <div class="value">@Model.PendingApprovals</div>
-        <div class="label"><a asp-page="/Approvals/Index">雙人覆核待決</a></div>
-    </div>
-    <div class="card">
-        <div class="value">@Model.DuePregnancies</div>
-        <div class="label">臨盆待抽取</div>
-    </div>
-</div>
+<p>
+    @Model.DisplayName
+    @if (Model.Roles.Count > 0)
+    {
+        <span class="roles">@string.Join("、", Model.Roles)</span>
+    }
+</p>
 
-<h2>宮廷現況</h2>
-<div class="cards">
-    <div class="card">
-        <div class="value">@Model.ActiveCharacters</div>
-        <div class="label">在世角色</div>
-    </div>
-    <div class="card">
-        <div class="value">@Model.WaitingHeirs</div>
-        <div class="label">待生池人數</div>
-    </div>
-    <div class="card">
-        <div class="value">@Model.OpenEvents</div>
-        <div class="label">開放中的事件</div>
-    </div>
-</div>
+<section>
+    <h2>目前狀態</h2>
+    <table class="stats">
+        <tbody>
+            <tr><th>使用者</th><td>@Model.UserCount</td></tr>
+            <tr><th>角色</th><td>@Model.CharacterCount</td></tr>
+            <tr><th>待審建角申請</th><td>@Model.OpenApplicationCount</td></tr>
+            <tr><th>位階</th><td>@Model.RankCount</td></tr>
+            <tr><th>已發布 NPC</th><td>@Model.PublishedNpcCount</td></tr>
+        </tbody>
+    </table>
+</section>
 
-@if (Model.DeadOutboxMessages > 0 || Model.FailingJobs > 0)
+@if (!Model.RulesSeeded)
 {
-    <h2>系統告警</h2>
-    <div class="cards">
-        @if (Model.DeadOutboxMessages > 0)
-        {
-            <div class="card">
-                <div class="value">@Model.DeadOutboxMessages</div>
-                <div class="label">Outbox 已放棄重試，需人工處理</div>
-            </div>
-        }
-        @if (Model.FailingJobs > 0)
-        {
-            <div class="card">
-                <div class="value">@Model.FailingJobs</div>
-                <div class="label">連續失敗的排程工作</div>
-            </div>
-        }
-    </div>
+    <section class="notice">
+        <h2>尚未灌入規則資料</h2>
+        <p>
+            位階、能力標籤、地點與 NPC 都還沒有資料，因此建角審核無法進行。
+            請依 <code>implementation_bootstrap_v1.1</code> §7 的順序執行
+            <code>seed_rules_v1.1.sql</code> 與 <code>seed_npcs_v1.1.sql</code>，
+            再以 <code>GongWei.AdminCli verify-database</code> 驗收。
+        </p>
+    </section>
 }
+
+<section class="notice">
+    <h2>尚未掛載的模組</h2>
+    <p>
+        建角審核、立繪審核與核可佇列等頁面仍是 v1.0 時期的版本，尚未依 v1.1 重寫，
+        因此暫時排除在編譯之外（任務 #15）。原始碼保留在
+        <code>src/GongWei.Admin/PendingV11/</code>。
+    </p>
+</section>

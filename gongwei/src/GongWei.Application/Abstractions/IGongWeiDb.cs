@@ -1,4 +1,4 @@
-using GongWei.Domain.Characters;
+﻿using GongWei.Domain.Characters;
 using GongWei.Domain.Economy;
 using GongWei.Domain.Events;
 using GongWei.Domain.Identity;
@@ -24,6 +24,7 @@ public interface IGongWeiDb
     DbSet<MediaAsset> MediaAssets { get; }
     DbSet<PlayerPortraitSubmission> PlayerPortraitSubmissions { get; }
     DbSet<LineLoginAttempt> LineLoginAttempts { get; }
+    DbSet<AdminCredential> AdminCredentials { get; }
     DbSet<Rank> Ranks { get; }
     DbSet<CharacterTitleDefinition> CharacterTitleDefinitions { get; }
     DbSet<Residence> Residences { get; }

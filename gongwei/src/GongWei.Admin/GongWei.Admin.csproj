@@ -9,6 +9,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- v1.0-era pages, kept out of the build until task #15 rewrites them against the
+         v1.1 entities. Retained rather than deleted because they are the only record of
+         which admin screens already had an implementation. -->
+    <Compile Remove="PendingV11\**\*.cs" />
+    <Content Remove="PendingV11\**\*.cshtml" />
+    <None Include="PendingV11\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Sinks.File" />

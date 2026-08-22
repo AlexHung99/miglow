@@ -30,6 +30,7 @@ builder.Services.AddSingleton<ICurrentUser, ConsoleOperator>();
 builder.Services.AddGongWeiInfrastructure(builder.Configuration);
 
 builder.Services.AddScoped<GrantSuperAdminCommand>();
+builder.Services.AddScoped<CreateLocalAdminCommand>();
 builder.Services.AddScoped<VerifyDatabaseCommand>();
 builder.Services.AddScoped<ShowMigrationStatusCommand>();
 
@@ -49,6 +50,10 @@ try
     {
         "grant-super-admin" => await scope.ServiceProvider
             .GetRequiredService<GrantSuperAdminCommand>()
+            .RunAsync(parsed, cancellation.Token),
+
+        "create-local-admin" => await scope.ServiceProvider
+            .GetRequiredService<CreateLocalAdminCommand>()
             .RunAsync(parsed, cancellation.Token),
 
         "verify-database" => await scope.ServiceProvider
@@ -85,6 +90,12 @@ static void PrintUsage()
           grant-super-admin --line-user-id <LINE_SUB> --reason '<why>' [--confirm '<phrase>']
               Promotes an account that has already signed in through LINE Login.
               Idempotent. Prompts for confirmation unless --confirm carries the exact phrase.
+
+          create-local-admin --username <name> [--display-name '<shown in audit>']
+              Creates, or resets the password of, a local super admin for the control back
+              office. The password is typed at the prompt — there is no --password flag,
+              because an argument reaches the shell history and the process list.
+              This account signs in at the admin site only and never gets a player session.
 
           verify-database
               Checks migrations, table count, triggers, uuid defaults, the super admin,

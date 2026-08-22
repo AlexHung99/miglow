@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using GongWei.Application.Abstractions;
 using GongWei.Domain.Common;
 using Microsoft.AspNetCore.Authorization;
@@ -85,7 +85,7 @@ public sealed class AdminCurrentUser(IHttpContextAccessor accessor) : ICurrentUs
 
     public Guid RequireUserId() =>
         UserId ?? throw new DomainException(
-            ErrorCodes.Unauthenticated, "Sign in first.", DomainErrorKind.Unauthenticated);
+            ErrorCodes.AuthRequired, "Sign in first.", DomainErrorKind.Unauthenticated);
 
     public void RequireRole(params AdminRole[] anyOf)
     {
