@@ -165,11 +165,16 @@ app.UseSerilogRequestLogging(options =>
 });
 app.UseExceptionHandler();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-else
+// Published in every environment, not just Development: the front end is a separate
+// team on a separate repo, and the OpenAPI document is how they see the real request and
+// response shapes rather than reading them out of the spec by hand. It describes only
+// routes that actually exist, which also makes "is this endpoint built yet" answerable.
+//
+// It carries no secret — the channel secret is never a parameter, and settings are not
+// serialised into the document (api_v1_v1.1 §2.1).
+app.MapOpenApi("/api/v1/openapi.json").AllowAnonymous();
+
+if (!app.Environment.IsDevelopment())
 {
     app.UseHsts();
 }

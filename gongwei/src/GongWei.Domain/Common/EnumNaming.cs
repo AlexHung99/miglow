@@ -64,6 +64,34 @@ public static class EnumNaming
         return Enum.Parse<TEnum>(name);
     }
 
+    /// <summary>
+    /// Parses a value that came from a client rather than from the database.
+    ///
+    /// <see cref="FromDbValue"/> throws, and rightly so: an unknown value there means the
+    /// schema and the enum have drifted. An unknown value from a request body is just a
+    /// typo, and must become a field error rather than a 500.
+    /// </summary>
+    public static bool TryParse<TEnum>(string? value, out TEnum parsed) where TEnum : struct, Enum
+    {
+        parsed = default;
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        var map = FromDb.GetOrAdd(typeof(TEnum), static t =>
+            Enum.GetNames(t).ToDictionary(ToSnakeCase, n => n, StringComparer.Ordinal));
+
+        if (!map.TryGetValue(value.Trim(), out var name))
+        {
+            return false;
+        }
+
+        parsed = Enum.Parse<TEnum>(name);
+        return true;
+    }
+
     /// <summary>All persisted spellings of an enum — used to assert against the DB CHECK lists in tests.</summary>
     public static IReadOnlyList<string> AllDbValues<TEnum>() where TEnum : struct, Enum =>
         Enum.GetNames<TEnum>().Select(ToSnakeCase).ToList();

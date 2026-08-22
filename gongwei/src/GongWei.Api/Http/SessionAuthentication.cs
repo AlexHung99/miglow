@@ -96,11 +96,25 @@ public sealed class CsrfMiddleware(RequestDelegate next)
             return;
         }
 
-        var headerToken = context.Request.Headers[HeaderName].ToString();
         var sessionIdClaim = context.User.FindFirst(GongWeiClaims.SessionId)?.Value;
 
+        // No session, nothing to forge. Hand the request on so authorization answers 401
+        // AUTH_REQUIRED and a bad path answers 404.
+        //
+        // Rejecting here instead made every unauthenticated POST/PATCH/DELETE return 403
+        // — including ones whose route does not exist — so a caller could not tell "not
+        // signed in" from "wrong token" from "no such endpoint". Nothing is lost: CSRF is
+        // an attack on an authenticated session, and without one there is no authority to
+        // borrow.
+        if (!Guid.TryParse(sessionIdClaim, out var sessionId))
+        {
+            await next(context);
+            return;
+        }
+
+        var headerToken = context.Request.Headers[HeaderName].ToString();
+
         var ok = !string.IsNullOrEmpty(headerToken)
-                 && Guid.TryParse(sessionIdClaim, out var sessionId)
                  && await sessions.ValidateCsrfAsync(sessionId, headerToken, context.RequestAborted);
 
         if (!ok)
