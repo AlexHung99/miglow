@@ -124,6 +124,14 @@ END
         Write-Warning "seed_npcs_v1.1.sql not found — NPC content will be empty until it is supplied."
     }
 
+    $portraitSeed = Join-Path $repoRoot 'db/authoritative/v1.1/seed_preset_portraits_v1.1.sql'
+    if (Test-Path $portraitSeed) {
+        & $PsqlPath -h $PgHost -p $Port -U $AppRole -d $Database -v ON_ERROR_STOP=1 -q -f $portraitSeed
+        if ($LASTEXITCODE -ne 0) { throw "Seeding preset portrait data failed." }
+    } else {
+        Write-Warning "seed_preset_portraits_v1.1.sql not found — official portrait choices will be empty."
+    }
+
     # --- store the connection string in user-secrets ------------------------
     Write-Host "[5/5] writing the connection string to user-secrets..." -ForegroundColor Yellow
 
