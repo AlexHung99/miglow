@@ -129,19 +129,12 @@ public class CharacterApplicationConfiguration : IEntityTypeConfiguration<Charac
             // Role and sex can never disagree — sex is derived, never supplied (§13.1).
             t.HasCheckConstraint("ck_ca_role_sex",
                 "(role = 'prince' AND sex = 'male') OR (role IN ('consort', 'princess') AND sex = 'female')");
-            // Draft may be incomplete; everything past draft is fully validated.
+            // Draft may be incomplete; only identity, age and portrait are required on submit.
             t.HasCheckConstraint("ck_ca_given_name",
                 "status = 'draft' OR char_length(btrim(given_name)) BETWEEN 1 AND 30");
             t.HasCheckConstraint("ck_ca_portrait_xor",
                 "status = 'draft' OR ((portrait_id IS NOT NULL)::integer + " +
                 "(player_portrait_submission_id IS NOT NULL)::integer = 1)");
-            t.HasCheckConstraint("ck_ca_appearance_len", "status = 'draft' OR char_length(appearance) >= 60");
-            t.HasCheckConstraint("ck_ca_personality_len", "status = 'draft' OR char_length(personality) >= 50");
-            t.HasCheckConstraint("ck_ca_strengths_len", "status = 'draft' OR char_length(strengths) >= 50");
-            t.HasCheckConstraint("ck_ca_weaknesses_len", "status = 'draft' OR char_length(weaknesses) >= 50");
-            t.HasCheckConstraint("ck_ca_likes_len", "status = 'draft' OR char_length(likes) >= 50");
-            t.HasCheckConstraint("ck_ca_dislikes_len", "status = 'draft' OR char_length(dislikes) >= 50");
-            t.HasCheckConstraint("ck_ca_biography_len", "status = 'draft' OR char_length(biography) >= 200");
             t.HasCheckConstraint("ck_ca_age_and_family",
                 "status = 'draft' OR " +
                 "(role = 'consort' AND age BETWEEN 15 AND 18 AND char_length(btrim(family_name)) > 0) OR " +

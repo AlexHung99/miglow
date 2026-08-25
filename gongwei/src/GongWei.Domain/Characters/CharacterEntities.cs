@@ -235,26 +235,10 @@ public class CharacterApplication : IVersioned, IHasId
     {
         var errors = new Dictionary<string, string[]>();
 
-        void Require(string field, string value, int minimum, string label)
-        {
-            if (value.Trim().Length < minimum)
-            {
-                errors[field] = [$"{label}至少需要 {minimum} 字"];
-            }
-        }
-
         if (GivenName.Trim().Length is < 1 or > 30)
         {
             errors[nameof(GivenName)] = ["名字需為 1–30 字"];
         }
-
-        Require(nameof(Appearance), Appearance, 60, "容貌");
-        Require(nameof(Personality), Personality, 50, "性格");
-        Require(nameof(Strengths), Strengths, 50, "擅長");
-        Require(nameof(Weaknesses), Weaknesses, 50, "不擅長");
-        Require(nameof(Likes), Likes, 50, "喜好");
-        Require(nameof(Dislikes), Dislikes, 50, "厭惡");
-        Require(nameof(Biography), Biography, 200, "自介");
 
         if (Role == CharacterRole.Consort)
         {

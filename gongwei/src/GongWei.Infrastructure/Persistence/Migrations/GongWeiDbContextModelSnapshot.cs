@@ -501,23 +501,13 @@ namespace GongWei.Infrastructure.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_ca_age_and_family", "status = 'draft' OR (role = 'consort' AND age BETWEEN 15 AND 18 AND char_length(btrim(family_name)) > 0) OR (role IN ('prince', 'princess') AND age = 0 AND family_name = '蕭')");
 
-                            t.HasCheckConstraint("ck_ca_appearance_len", "status = 'draft' OR char_length(appearance) >= 60");
-
                             t.HasCheckConstraint("ck_ca_approved_reviewed", "(status = 'approved' AND reviewed_at IS NOT NULL AND reviewed_by IS NOT NULL) OR status <> 'approved'");
-
-                            t.HasCheckConstraint("ck_ca_biography_len", "status = 'draft' OR char_length(biography) >= 200");
-
-                            t.HasCheckConstraint("ck_ca_dislikes_len", "status = 'draft' OR char_length(dislikes) >= 50");
 
                             t.HasCheckConstraint("ck_ca_draft_not_submitted", "(status = 'draft' AND submitted_at IS NULL) OR status <> 'draft'");
 
                             t.HasCheckConstraint("ck_ca_form_data", "jsonb_typeof(form_data) = 'object'");
 
                             t.HasCheckConstraint("ck_ca_given_name", "status = 'draft' OR char_length(btrim(given_name)) BETWEEN 1 AND 30");
-
-                            t.HasCheckConstraint("ck_ca_likes_len", "status = 'draft' OR char_length(likes) >= 50");
-
-                            t.HasCheckConstraint("ck_ca_personality_len", "status = 'draft' OR char_length(personality) >= 50");
 
                             t.HasCheckConstraint("ck_ca_portrait_xor", "status = 'draft' OR ((portrait_id IS NOT NULL)::integer + (player_portrait_submission_id IS NOT NULL)::integer = 1)");
 
@@ -529,11 +519,8 @@ namespace GongWei.Infrastructure.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_ca_status", "status IN ('draft', 'submitted', 'needs_revision', 'approved', 'rejected', 'cancelled')");
 
-                            t.HasCheckConstraint("ck_ca_strengths_len", "status = 'draft' OR char_length(strengths) >= 50");
-
                             t.HasCheckConstraint("ck_ca_version", "version > 0");
 
-                            t.HasCheckConstraint("ck_ca_weaknesses_len", "status = 'draft' OR char_length(weaknesses) >= 50");
                         });
                 });
 

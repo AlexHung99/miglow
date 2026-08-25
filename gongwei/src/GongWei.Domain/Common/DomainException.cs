@@ -35,7 +35,7 @@ public sealed class DomainException : Exception
 
     /// <summary>
     /// Field-level messages rendered as the Problem Details <c>errors</c> object,
-    /// e.g. <c>{"biography": ["自介至少需要 200 字"]}</c>.
+    /// e.g. <c>{"givenName": ["名字需為 1–30 字"]}</c>.
     /// </summary>
     public IReadOnlyDictionary<string, string[]>? Errors { get; }
 

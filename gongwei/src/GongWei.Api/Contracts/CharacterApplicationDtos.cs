@@ -55,7 +55,8 @@ public sealed record ApplicationFormRequest(
             FamilyName: Trim(FamilyName) ?? string.Empty,
             GivenName: Trim(GivenName) ?? string.Empty,
             CourtesyName: Trim(CourtesyName),
-            BirthDateLabel: Trim(BirthDateLabel),
+            // Kept in the wire contract for old clients, but intentionally ignored.
+            BirthDateLabel: null,
             Age: Age,
             Appearance: Trim(Appearance) ?? string.Empty,
             Biography: Trim(Biography) ?? string.Empty,

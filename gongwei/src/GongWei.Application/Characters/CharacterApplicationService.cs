@@ -37,7 +37,7 @@ public sealed record ApplicationFormInput(
     Guid? PlayerPortraitSubmissionId,
     string? FormDataJson);
 
-/// <summary>Reviewer scores: 字數 35%、文筆 50%、邏輯 15% (rank_catalog_v1.0 §7).</summary>
+/// <summary>Optional reviewer scores retained for backward-compatible administration workflows.</summary>
 public sealed record ApplicationScores(int WordCount, int Writing, int Logic);
 
 public sealed record ApproveApplicationInput(
@@ -510,7 +510,9 @@ public sealed class CharacterApplicationService(
         application.FamilyName = input.FamilyName.Trim();
         application.GivenName = input.GivenName.Trim();
         application.CourtesyName = input.CourtesyName?.Trim();
-        application.BirthDateLabel = input.BirthDateLabel?.Trim();
+        // Character applications no longer collect a birth date. A royal child's
+        // actual birth date is written only by the birth transaction.
+        application.BirthDateLabel = null;
         application.Age = input.Age;
         application.Appearance = input.Appearance.Trim();
         application.Biography = input.Biography.Trim();
