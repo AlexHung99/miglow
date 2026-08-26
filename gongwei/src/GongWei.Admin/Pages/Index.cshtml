@@ -20,7 +20,7 @@
         <tbody>
             <tr><th>使用者</th><td>@Model.UserCount</td></tr>
             <tr><th>角色</th><td>@Model.CharacterCount</td></tr>
-            <tr><th>待審建角申請</th><td>@Model.OpenApplicationCount</td></tr>
+            <tr><th>待審建角申請</th><td><a asp-page="/Applications/Index">@Model.OpenApplicationCount 筆</a></td></tr>
             <tr><th>位階</th><td>@Model.RankCount</td></tr>
             <tr><th>已發布 NPC</th><td>@Model.PublishedNpcCount</td></tr>
         </tbody>
@@ -43,7 +43,7 @@
 <section class="notice">
     <h2>尚未掛載的模組</h2>
     <p>
-        建角審核、立繪審核與核可佇列等頁面仍是 v1.0 時期的版本，尚未依 v1.1 重寫，
+        立繪審核與核可佇列等頁面仍是 v1.0 時期的版本，尚未依 v1.1 重寫，
         因此暫時排除在編譯之外（任務 #15）。原始碼保留在
         <code>src/GongWei.Admin/PendingV11/</code>。
     </p>

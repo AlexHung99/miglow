@@ -94,6 +94,8 @@ button, .button {
 }
 
 button.secondary { background: transparent; color: var(--accent); }
+button.danger { border-color: #8f2832; background: #8f2832; }
+.secondary-link { border-color: var(--line); background: var(--panel); color: var(--ink); }
 
 label { display: block; margin: 0.75rem 0 0.25rem; font-size: 0.9em; color: var(--muted); }
 
@@ -114,3 +116,39 @@ input, textarea, select {
 .footer { text-align: center; color: var(--muted); font-size: 0.85em; padding: 2rem 0; }
 
 .empty { color: var(--muted); padding: 2rem; text-align: center; }
+
+.page-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; margin-bottom:1.25rem; }
+.page-heading span { color:var(--accent); font-size:.75rem; font-weight:700; letter-spacing:.14em; }
+.page-heading h1 { margin:.15rem 0; }
+.page-heading p { margin:0; color:var(--muted); }
+.application-queue td { vertical-align:middle; }
+.application-review-layout { display:grid; grid-template-columns:280px minmax(0,1fr); gap:1.25rem; align-items:start; }
+.application-portrait-card { overflow:hidden; padding:0; position:sticky; top:1rem; }
+.application-portrait-card > img,.portrait-missing { width:100%; height:390px; display:block; object-fit:cover; object-position:center 18%; background:var(--paper); }
+.portrait-missing { display:grid; place-items:center; color:var(--muted); }
+.application-portrait-card > div:last-child { padding:1rem; }
+.application-portrait-card h2 { margin:.5rem 0 .2rem; }
+.application-portrait-card p { margin:0; color:var(--muted); }
+.application-review-content { display:grid; gap:1rem; }
+.detail-section h2 { margin:0 0 .5rem; }
+.detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 1.25rem; margin:0; }
+.detail-grid > div { padding:.75rem 0; border-bottom:1px solid var(--line); }
+.detail-grid dt { color:var(--muted); font-size:.78rem; }
+.detail-grid dd { margin:.25rem 0 0; white-space:pre-wrap; }
+.detail-grid.narrative > div { grid-column:1/-1; }
+.raw-application-data summary { cursor:pointer; font-weight:600; }
+.raw-application-data pre { overflow:auto; margin:1rem 0 0; padding:1rem; border-radius:4px; background:var(--paper); white-space:pre-wrap; }
+.review-decision { margin-top:1.25rem; }
+.review-decision h2 { margin-top:0; }
+.decision-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.decision-actions { display:flex; flex-wrap:wrap; gap:.65rem; margin-top:1rem; }
+
+@media (max-width: 760px) {
+    .topbar { flex-wrap:wrap; }
+    .nav { order:3; width:100%; overflow-x:auto; }
+    .page-heading { align-items:flex-start; flex-direction:column; }
+    .application-review-layout { grid-template-columns:1fr; }
+    .application-portrait-card { position:static; }
+    .application-portrait-card > img,.portrait-missing { height:min(120vw,520px); }
+    .detail-grid,.decision-grid { grid-template-columns:1fr; }
+}

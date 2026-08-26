@@ -1,0 +1,110 @@
+@page "{id:guid}"
+@model GongWei.Admin.Pages.Applications.ReviewModel
+@{
+    ViewData["Title"] = "建角申請詳情";
+    var application = Model.Application!;
+    string Show(string? value) => string.IsNullOrWhiteSpace(value) ? "未填" : value;
+}
+
+<div class="page-heading">
+    <div>
+        <span>APPLICATION DETAIL</span>
+        <h1>@application.FullName</h1>
+        <p>@application.PlayerName 提交・@application.SubmittedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</p>
+    </div>
+    <a class="button secondary-link" asp-page="/Applications/Index">返回審核佇列</a>
+</div>
+
+<section class="application-review-layout">
+    <aside class="application-portrait-card card">
+        @if (application.PortraitUrl is not null)
+        {
+            <img src="@application.PortraitUrl" alt="@application.FullName 的人物立繪" />
+        }
+        else if (application.HasUploadedPortrait)
+        {
+            <img src="@Url.Page("/Applications/Review", "Portrait", new { id = application.Id })" alt="@application.FullName 的自訂立繪" />
+        }
+        else
+        {
+            <div class="portrait-missing">沒有可顯示的立繪</div>
+        }
+        <div>
+            <span class="badge">@application.PortraitKind</span>
+            <h2>@application.PortraitName</h2>
+            @if (application.PortraitReviewStatus is not null)
+            {
+                <p>圖片狀態：@application.PortraitReviewStatus</p>
+            }
+        </div>
+    </aside>
+
+    <div class="application-review-content">
+        <section class="card detail-section">
+            <h2>角色身份</h2>
+            <dl class="detail-grid compact">
+                <div><dt>玩家帳號</dt><dd>@application.PlayerName</dd></div>
+                <div><dt>身份</dt><dd>@application.RoleLabel</dd></div>
+                <div><dt>姓名</dt><dd>@application.FullName</dd></div>
+                <div><dt>表字</dt><dd>@Show(application.CourtesyName)</dd></div>
+                <div><dt>年齡</dt><dd>@application.AgeLabel</dd></div>
+                <div><dt>申請狀態</dt><dd><span class="badge">@application.StatusLabel</span></dd></div>
+                <div><dt>建立時間</dt><dd>@application.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</dd></div>
+                <div><dt>最後更新</dt><dd>@application.UpdatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")・v@application.Version</dd></div>
+            </dl>
+        </section>
+
+        <section class="card detail-section">
+            <h2>人物設定</h2>
+            <dl class="detail-grid narrative">
+                <div><dt>容貌描述</dt><dd>@Show(application.Appearance)</dd></div>
+                <div><dt>人物自介</dt><dd>@Show(application.Biography)</dd></div>
+                <div><dt>性格</dt><dd>@Show(application.Personality)</dd></div>
+                <div><dt>擅長</dt><dd>@Show(application.Strengths)</dd></div>
+                <div><dt>不擅</dt><dd>@Show(application.Weaknesses)</dd></div>
+                <div><dt>喜歡</dt><dd>@Show(application.Likes)</dd></div>
+                <div><dt>不喜</dt><dd>@Show(application.Dislikes)</dd></div>
+            </dl>
+        </section>
+
+        @if (application.FormData != "{}")
+        {
+            <details class="card raw-application-data">
+                <summary>其他建角欄位</summary>
+                <pre>@application.FormData</pre>
+            </details>
+        }
+    </div>
+</section>
+
+@if (application.PortraitReviewStatus is not null && application.PortraitReviewStatus != "已核准")
+{
+    <div class="flash flash-error">自訂立繪尚未核准，建立正式角色前必須先完成圖片審核。</div>
+}
+
+@if (application.CanReview)
+{
+    <section class="card review-decision">
+        <h2>審核決定</h2>
+        <form method="post">
+            <input type="hidden" asp-for="Version" />
+
+            <div class="decision-grid">
+                <label><span>初始位階</span><select asp-for="InitialRankId" asp-items="@Model.Ranks"><option value="">請選擇位階</option></select></label>
+                <label><span>初始居所（選填）</span><select asp-for="ResidenceId" asp-items="@Model.Residences"><option value="">暫不分宮</option></select></label>
+            </div>
+
+            <label><span>審核備註</span><textarea asp-for="Note" rows="4" placeholder="退回補件與拒絕申請時必須填寫原因"></textarea></label>
+
+            <div class="decision-actions">
+                <button type="submit" asp-page-handler="Approve" asp-route-id="@application.Id">核准並建立角色</button>
+                <button type="submit" class="secondary" asp-page-handler="RequestRevision" asp-route-id="@application.Id">退回補件</button>
+                <button type="submit" class="danger" asp-page-handler="Reject" asp-route-id="@application.Id">拒絕申請</button>
+            </div>
+        </form>
+    </section>
+}
+else
+{
+    <div class="flash flash-error">此申請目前為「@application.StatusLabel」，已不可在本頁執行審核。</div>
+}
