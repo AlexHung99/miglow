@@ -187,6 +187,51 @@ public sealed class CharacterApplicationService(
         return application;
     }
 
+    /// <summary>
+    /// Withdraws a submitted application from review without discarding any player
+    /// content. The same row returns to Draft and can be edited and submitted again.
+    /// </summary>
+    public async Task<CharacterApplication> WithdrawForEditingAsync(
+        Guid applicationId,
+        long expectedVersion,
+        string? reason,
+        CancellationToken ct = default)
+    {
+        var userId = currentUser.RequireUserId();
+        var now = clock.UtcNow;
+
+        var application = await LoadOwnAsync(applicationId, userId, ct);
+        application.EnsureVersion(expectedVersion);
+
+        if (application.Status != ApplicationStatus.Submitted)
+        {
+            throw DomainException.Conflict(
+                ErrorCodes.ConflictState, "只有等待審核中的申請可以取消送審。");
+        }
+
+        if (application.ReviewedBy is not null || application.ReviewedAt is not null)
+        {
+            throw DomainException.Conflict(
+                ErrorCodes.ConflictState, "管理人員已完成審核處理，無法取消送審。");
+        }
+
+        var before = Snapshot(application);
+        ApplicationLifecycle.EnsureCanTransition(application.Status, ApplicationStatus.Draft);
+
+        application.Status = ApplicationStatus.Draft;
+        application.SubmittedAt = null;
+        application.ReviewNote = null;
+        await WriteRevisionAsync(application, userId, reason ?? "player_withdraw_for_edit", now, ct);
+
+        audit.Write("character_application.withdraw", "character_application", application.Id,
+            before, Snapshot(application), reason ?? "player_withdraw_for_edit");
+        outbox.Enqueue("character_application.withdrawn", "character_application", application.Id,
+            new { applicationId = application.Id, userId });
+
+        await db.SaveChangesAsync(ct);
+        return application;
+    }
+
     // ------------------------------------------------------------------- admin
 
     public async Task<CharacterApplication> RequestRevisionAsync(

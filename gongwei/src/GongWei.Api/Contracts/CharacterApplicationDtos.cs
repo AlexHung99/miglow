@@ -80,6 +80,9 @@ public sealed record ApplicationFormRequest(
 /// <summary><c>SubmitApplicationRequest</c> — the version the player believes they are submitting.</summary>
 public sealed record SubmitApplicationRequest(long? ExpectedVersion);
 
+/// <summary>Cancels review while retaining the application as an editable draft.</summary>
+public sealed record CancelApplicationRequest(long? ExpectedVersion, string? Reason);
+
 /// <summary><c>CharacterApplicationDto</c>. Reviewer identity is never exposed to the player.</summary>
 public sealed record CharacterApplicationResponse(
     Guid Id,

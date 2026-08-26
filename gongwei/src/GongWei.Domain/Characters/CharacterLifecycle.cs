@@ -10,6 +10,7 @@ public static class ApplicationLifecycle
         [ApplicationStatus.Draft] = [ApplicationStatus.Submitted, ApplicationStatus.Cancelled],
         [ApplicationStatus.Submitted] =
         [
+            ApplicationStatus.Draft,
             ApplicationStatus.NeedsRevision,
             ApplicationStatus.Approved,
             ApplicationStatus.Rejected,

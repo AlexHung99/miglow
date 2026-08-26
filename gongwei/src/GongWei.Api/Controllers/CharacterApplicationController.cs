@@ -113,6 +113,25 @@ public sealed class CharacterApplicationController(
         return Ok(CharacterApplicationResponse.From(application));
     }
 
+    /// <summary>
+    /// Withdraws a submitted application and returns the same data as an editable Draft.
+    /// Completed approvals are intentionally terminal and cannot use this endpoint.
+    /// </summary>
+    [HttpPost("character-applications/{id:guid}/cancel")]
+    [RequireIdempotency]
+    public async Task<ActionResult<CharacterApplicationResponse>> Cancel(
+        Guid id,
+        [FromBody] CancelApplicationRequest? request,
+        CancellationToken ct)
+    {
+        var expectedVersion = request?.ExpectedVersion ?? ETagHelper.RequireIfMatch(Request);
+        var application = await applications.WithdrawForEditingAsync(
+            id, expectedVersion, request?.Reason, ct);
+
+        Response.Headers.ETag = ETagHelper.Format(application.Version);
+        return Ok(CharacterApplicationResponse.From(application));
+    }
+
     /// <summary>The official illustration set, filtered to the role being applied for.</summary>
     [HttpGet("portraits")]
     public async Task<ActionResult<IReadOnlyList<PortraitSummaryResponse>>> Portraits(
